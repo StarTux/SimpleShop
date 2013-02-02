@@ -6,3 +6,5 @@
 *.ear
 /lib
 /trash
+/files
+/libs
