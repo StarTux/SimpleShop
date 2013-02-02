@@ -24,7 +24,14 @@ public class PlayerListener implements Listener {
                 this.plugin = plugin;
         }
 
-        @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
+        /**
+         * When a right clicked chest or sign is identified as
+         * part of a shop chest, we want to send an informative
+         * message and open the chest. The opening is done
+         * manually and the event cancelled so protection plugins
+         * don't get involved later.
+         */
+        @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
         public void onPlayerInteract(PlayerInteractEvent event) {
                 if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
                 if (event.getClickedBlock() == null) return;
@@ -55,6 +62,12 @@ public class PlayerListener implements Listener {
                 event.getPlayer().openInventory(shopChest.getInventory().getHolder().getInventory());
         }
 
+        /**
+         * Helper function to create the genitive case of a player
+         * obeying apostrophy rules. Examples:
+         * Sirabell => Sirabell's
+         * StarTux => StarTux'
+         */
         private String genitiveName(String name) {
                 if (name.endsWith("s") || name.endsWith("x") || name.endsWith("z")) {
                         return name + "'";
@@ -62,6 +75,12 @@ public class PlayerListener implements Listener {
                 return name + "'s";
         }
 
+        /**
+         * Shop activity is decided by click events in
+         * inventories. As a general rule of thumb, when an event
+         * causes a purchase, we do the work manually instead of
+         * relying on vanilla logic.
+         */
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
         public void onInventoryClick(InventoryClickEvent event) {
                 if (event.getSlotType() == InventoryType.SlotType.OUTSIDE) return;
@@ -232,7 +251,12 @@ public class PlayerListener implements Listener {
                 return;
         }
 
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+        /**
+         * We need to make sure that players can only create shops
+         * with their own name on them to avoid exploits.
+         * Anything more than that requires special permissions.
+         */
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
         public void onSignChange(SignChangeEvent event) {
                 if (!ShopChest.isShopTitle(event.getLine(0))) return;
                 if (!event.getPlayer().hasPermission("simpleshop.create")) {
