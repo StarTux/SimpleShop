@@ -3,6 +3,7 @@ package com.winthier.simpleshop.listener;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -40,7 +41,8 @@ public class PlayerListener implements Listener {
                 if (shopChest == null) shopChest = ShopChest.getBySign(event.getClickedBlock());
                 if (shopChest == null) return;
                 if ((shopChest.isOwner(event.getPlayer()) && event.getPlayer().hasPermission("simpleshop.edit")) ||
-                    event.getPlayer().hasPermission("simpleshop.edit.other")) {
+                    (!shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.other")) ||
+                    (shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.admin"))) {
                         Double price = plugin.getPriceMap().get(event.getPlayer().getName());
                         if (price != null) {
                                 shopChest.setPrice(price);
@@ -50,13 +52,18 @@ public class PlayerListener implements Listener {
                                 return;
                         }
                 }
+                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
                 if (shopChest.isBlocked()) return;
-                if (shopChest.isAdminChest()) {
-                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "Admin Shop Chest");
-                } else if (shopChest.isOwner(event.getPlayer())) {
+                if (shopChest.isOwner(event.getPlayer())) {
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + "Your Shop Chest");
                 } else {
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + genitiveName(shopChest.getOwnerName()) + " Shop Chest");
+                        if (shopChest.isBuyingChest()) {
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Will buy for " + plugin.getEconomy().format(shopChest.getPrice()) + ".");
+                        }
+                        if (shopChest.isSellingChest()) {
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Will sell for " + plugin.getEconomy().format(shopChest.getPrice()) + ".");
+                        }
                 }
                 event.setCancelled(true);
                 event.getPlayer().openInventory(shopChest.getInventory().getHolder().getInventory());
@@ -87,6 +94,7 @@ public class PlayerListener implements Listener {
                 if (event.getRawSlot() < 0) return;
                 if (!(event.getWhoClicked() instanceof Player)) return;
                 Player player = (Player)event.getWhoClicked();
+                if (player.getGameMode() == GameMode.CREATIVE) return;
                 ShopChest shopChest = ShopChest.getByInventory(event.getInventory());
                 if (shopChest == null) return;
                 boolean isTopInventory = (event.getRawSlot() < event.getView().getTopInventory().getSize());
@@ -98,7 +106,6 @@ public class PlayerListener implements Listener {
                 }
                 // deny clicking items in for non-owners
                 if (!event.isShiftClick() && isTopInventory && event.getCursor().getType() != Material.AIR) {
-                        if (shopChest.isAdminChest() && player.hasPermission("simpleshop.admin")) return;
                         if (shopChest.isSellingChest()) {
                                 player.sendMessage("" + ChatColor.RED + "You can't sell here.");
                         }
@@ -173,7 +180,7 @@ public class PlayerListener implements Listener {
                                 return;
                         }
                 }
-                // single click chest slot to try to take item
+                // single click chest slot to try to take item out
                 if (!event.isShiftClick() && isTopInventory && event.getCurrentItem().getType() != Material.AIR) {
                         // deny taking items via single click for non-owners to avoid accidents
                         double price = shopChest.getPrice();
@@ -258,6 +265,7 @@ public class PlayerListener implements Listener {
          */
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
         public void onSignChange(SignChangeEvent event) {
+                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
                 if (!ShopChest.isShopTitle(event.getLine(0))) return;
                 if (!event.getPlayer().hasPermission("simpleshop.create")) {
                         event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission to create a shop");
@@ -300,6 +308,7 @@ public class PlayerListener implements Listener {
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onBlockPlace(BlockPlaceEvent event) {
+                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
                 if (event.getBlockPlaced().getType() == Material.CHEST) {
                         ShopChest shopChest = ShopChest.getByChest(event.getBlockPlaced());
                         if (shopChest != null && event.getPlayer().equals(shopChest.getOwner())) {

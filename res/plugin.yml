@@ -14,11 +14,13 @@ permissions:
     description: Use the "/shop" command
     default: true
   simpleshop.admin:
-    description: Full access to Admin Chests
+    description: All administrative privileges
     default: op
     children:
       simpleshop.create.admin: true
       simpleshop.edit.admin: true
+      simpleshop.create.other: true
+      simpleshop.edit.other: true
   simpleshop.create:
     description: Create a shop
     default: true
