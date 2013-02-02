@@ -1,0 +1,39 @@
+name: SimpleShop
+description: Sell items via chests
+version: 0.1
+author: StarTux
+depend: [ Vault ]
+main: com.winthier.simpleshop.SimpleShopPlugin
+commands:
+  shop:
+    description: Shop command interface
+    permission: simpleshop.cmd.shop
+    usage: /<command> [args...]
+permissions:
+  simpleshop.cmd.shop:
+    description: Use the "/shop" command
+    default: true
+  simpleshop.admin:
+    description: Full access to Admin Chests
+    default: op
+    children:
+      simpleshop.create.admin: true
+      simpleshop.edit.admin: true
+  simpleshop.create:
+    description: Create a shop
+    default: true
+  simpleshop.create.other:
+    description: Create a shop for another player
+    default: op
+  simpleshop.create.admin:
+    description: Create an admin chest
+    default: op
+  simpleshop.edit:
+    description: Edit the price tag of your shop
+    default: true
+  simpleshop.edit.other:
+    description: Edit the price tag of another player's shop
+    default: op
+  simpleshop.edit.admin:
+    description: Edit the price tag of an admin shop
+    default: op

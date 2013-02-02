@@ -1,0 +1,23 @@
+#!/bin/bash
+
+loud() {
+       echo $@
+       $@
+}
+
+concat() {
+	read line
+	echo -n $line
+	while read line; do
+		echo -n $1$line
+	done
+}
+
+set -e
+plugin=$(basename $(pwd))
+mkdir -vp target
+mkdir -vp lib
+find lib -type f -name '*.jar' | concat : > libs
+find src -type f -name '*.java' > files
+loud javac -d target -classpath @libs @files $@
+loud jar cf ${plugin}.jar -C res . -C target .
