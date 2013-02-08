@@ -60,10 +60,10 @@ public class PlayerListener implements Listener {
                         double price = shopChest.getPrice();
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + genitiveName(shopChest.getOwnerName()) + " Shop Chest");
                         if (!Double.isNaN(price) && shopChest.isBuyingChest()) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Will buy for " + plugin.getEconomy().format(price) + ".");
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can sell for " + plugin.getEconomy().format(price) + ".");
                         }
                         if (!Double.isNaN(price) && shopChest.isSellingChest()) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Will sell for " + plugin.getEconomy().format(price) + ".");
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can buy sell for " + plugin.getEconomy().format(price) + ".");
                         }
                 }
                 event.setCancelled(true);
