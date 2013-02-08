@@ -57,6 +57,9 @@ public class PlayerListener implements Listener {
                 if (shopChest.isOwner(event.getPlayer())) {
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + "Your Shop Chest");
                 } else {
+                        if (shopChest.isEmpty()) {
+                                shopChest.setSoldOut();
+                        }
                         double price = shopChest.getPrice();
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + genitiveName(shopChest.getOwnerName()) + " Shop Chest");
                         if (!Double.isNaN(price) && shopChest.isBuyingChest()) {
