@@ -1,6 +1,7 @@
 package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.ShopChest;
+import com.winthier.simpleshop.ShopSign;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -261,7 +262,7 @@ public class PlayerListener implements Listener {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
         public void onSignChange(SignChangeEvent event) {
                 if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
-                if (!ShopChest.isShopTitle(event.getLine(0))) return;
+                if (!ShopSign.isShopTitle(event.getLine(0))) return;
                 if (!event.getPlayer().hasPermission("simpleshop.create")) {
                         event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission to create a shop");
                         event.setCancelled(true);
@@ -276,7 +277,7 @@ public class PlayerListener implements Listener {
                 } catch (NumberFormatException nfe) {
                         event.setLine(1, "10");
                 }
-                if (event.getLine(3).equals(ShopChest.getAdminChestName())) {
+                if (event.getLine(3).equals(ShopSign.getAdminShopName())) {
                         if (!event.getPlayer().hasPermission("simpleshop.create.admin")) {
                                 event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission");
                                 event.setCancelled(true);

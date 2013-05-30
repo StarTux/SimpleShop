@@ -3,13 +3,11 @@ package com.winthier.simpleshop;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
@@ -22,43 +20,33 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class ShopChest {
         private Inventory inventory;
-        private Block sign;
         private Block left, right;
+        private ShopSign shopSign;
 
-        public ShopChest(Inventory inventory, Block sign, Block left, Block right) {
+        public ShopChest(Inventory inventory, ShopSign shopSign, Block left, Block right) {
                 this.inventory = inventory;
-                this.sign = sign;
+                this.shopSign = shopSign;
                 this.left = left;
                 this.right = right;
         }
 
         public static ShopChest getByChest(Block block) {
-                if (block.getType() != Material.CHEST) return null;
+                if (block.getType() != Material.CHEST && block.getType() != Material.TRAPPED_CHEST) return null;
                 Chest chest = (Chest)block.getState();
                 Inventory inventory = chest.getBlockInventory();
-                Sign sign = null;
                 Block left = null, right = null;
+                ShopSign shopSign = null;
                 inventory = inventory.getHolder().getInventory();
                 if (inventory instanceof DoubleChestInventory) {
                         DoubleChest doubleChest = ((DoubleChestInventory)inventory).getHolder();
                         left = ((Chest)doubleChest.getLeftSide()).getBlock();
                         right = ((Chest)doubleChest.getRightSide()).getBlock();
-                        if (isSign(left.getRelative(0, 1, 0).getType())) {
-                                sign = (Sign)left.getRelative(0, 1, 0).getState();
-                                if (!isShopTitle(sign.getLine(0))) sign = null;
-                        }
-                        if (sign == null && isSign(right.getRelative(0, 1, 0).getType())) {
-                                sign = (Sign)right.getRelative(0, 1, 0).getState();
-                        }
                 } else {
                         left = block;
-                        if (isSign(block.getRelative(0, 1, 0).getType())) {
-                                sign = (Sign)block.getRelative(0, 1, 0).getState();
-                        }
                 }
-                if (sign == null) return null;
-                if (!isShopTitle(sign.getLine(0))) return null;
-                return new ShopChest(inventory, sign.getBlock(), left, right);
+                shopSign = ShopSign.getByChest(left, right);
+                if (shopSign == null) return null;
+                return new ShopChest(inventory, shopSign, left, right);
         }
 
         public static ShopChest getBySign(Block block) {
@@ -73,6 +61,42 @@ public class ShopChest {
                         return getByChest(((DoubleChestInventory)inventory).getHolder().getLocation().getBlock());
                 }
                 return null;
+        }
+
+        public String getOwnerName() {
+                return shopSign.getOwnerName();
+        }
+
+        public Player getOwner() {
+                return shopSign.getOwner();
+        }
+
+        public boolean isOwner(Player player) {
+                return shopSign.isOwner(player);
+        }
+
+        public boolean isAdminChest() {
+                return shopSign.isAdminShop();
+        }
+
+        public boolean isBuyingChest() {
+                return shopSign.isBuyingShop();
+        }
+
+        public void setPrice(double price) {
+                shopSign.setPrice(price);
+        }
+
+        public void setSoldOut() {
+                shopSign.setSoldOut();
+        }
+
+        public double getPrice() {
+                return shopSign.getPrice();
+        }
+
+        public boolean isSellingChest() {
+                return shopSign.isSellingShop();
         }
 
         public List<Block> getBlocks() {
@@ -93,50 +117,6 @@ public class ShopChest {
                 if (blocksChest(left.getRelative(0, 1, 0))) return true;
                 if (right != null && blocksChest(right.getRelative(0, 1, 0))) return true;
                 return false;
-        }
-
-        private Sign getSign() {
-                return (Sign)sign.getState();
-        }
-        
-        public String getOwnerName() {
-                if (isAdminChest()) return "The Bank";
-                return getSign().getLine(3) + getSign().getLine(2);
-        }
-
-        public Player getOwner() {
-                if (isAdminChest()) return null;
-                return Bukkit.getServer().getPlayerExact(getOwnerName());
-        }
-
-        public boolean isOwner(Player player) {
-                if (isAdminChest()) return false;
-                return player.getName().equals(getOwnerName());
-        }
-
-        public boolean isAdminChest() {
-                return getSign().getLine(3).equals(getAdminChestName());
-        }
-
-        public double getPrice() {
-                try {
-                        return Double.parseDouble(getSign().getLine(1));
-                } catch (NumberFormatException nfe) {
-                        return Double.NaN;
-                }
-        }
-
-        public void setPrice(double price) {
-                if (price < 0.0) price = 0.0;
-                Sign state = getSign();
-                String tag = "" + price;
-                String tags[] = tag.split("\\.");
-                if (tags.length == 2 && tags[1].equals("0")) {
-                        state.setLine(1, "" + tags[0]);
-                } else {
-                        state.setLine(1, String.format("%.02f", price));
-                }
-                state.update();
         }
 
         public boolean isEmpty() {
@@ -169,48 +149,7 @@ public class ShopChest {
                 return null;
         }
 
-        public void setSoldOut() {
-                Sign state = getSign();
-                state.setLine(1, "SOLD OUT");
-                state.update();
-        }
-
         public Inventory getInventory() {
                 return inventory;
-        }
-
-        public static boolean isSign(Material mat) {
-                return mat == Material.SIGN_POST || mat == Material.WALL_SIGN;
-        }
-
-        public static String getAdminChestName() {
-                return "The Bank";
-        }
-
-        public static String getShopSignTitle() {
-                return "[shop]";
-        }
-
-        public static String getSellingSignTitle() {
-                return "[buy]";
-        }
-
-        public static String getBuyingSignTitle() {
-                return "[sell]";
-        }
-
-        public boolean isBuyingChest() {
-                return getSign().getLine(0).equalsIgnoreCase(getBuyingSignTitle());
-        }
-
-        public boolean isSellingChest() {
-                return getSign().getLine(0).equalsIgnoreCase(getSellingSignTitle()) ||
-                        getSign().getLine(0).equalsIgnoreCase(getShopSignTitle());
-        }
-
-        public static boolean isShopTitle(String line) {
-                return (line.equalsIgnoreCase(getSellingSignTitle()) ||
-                        line.equalsIgnoreCase(getBuyingSignTitle()) ||
-                        line.equalsIgnoreCase(getShopSignTitle()));
         }
 }
