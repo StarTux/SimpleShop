@@ -22,11 +22,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ShopChest {
         private Inventory inventory;
         private Block left, right;
-        private ShopSign shopSign;
+        private ShopData shopData;
 
-        public ShopChest(Inventory inventory, ShopSign shopSign, Block left, Block right) {
+        public ShopChest(Inventory inventory, ShopData shopData, Block left, Block right) {
                 this.inventory = inventory;
-                this.shopSign = shopSign;
+                this.shopData = shopData;
                 this.left = left;
                 this.right = right;
         }
@@ -36,20 +36,21 @@ public class ShopChest {
                 Chest chest = (Chest)block.getState();
                 Inventory inventory = chest.getBlockInventory();
                 Block left = null, right = null;
-                ShopSign shopSign = null;
-                if (SimpleShopPlugin.instance.allowShopSigns) {
-                        inventory = inventory.getHolder().getInventory();
-                        if (inventory instanceof DoubleChestInventory) {
-                                DoubleChest doubleChest = ((DoubleChestInventory)inventory).getHolder();
-                                left = ((Chest)doubleChest.getLeftSide()).getBlock();
-                                right = ((Chest)doubleChest.getRightSide()).getBlock();
-                        } else {
-                                left = block;
-                        }
-                        shopSign = ShopSign.getByChest(left, right);
+                ShopData shopData = null;
+                inventory = inventory.getHolder().getInventory();
+                if (inventory instanceof DoubleChestInventory) {
+                        DoubleChest doubleChest = ((DoubleChestInventory)inventory).getHolder();
+                        left = ((Chest)doubleChest.getLeftSide()).getBlock();
+                        right = ((Chest)doubleChest.getRightSide()).getBlock();
+                } else {
+                        left = block;
                 }
-                if (shopSign == null) return null;
-                return new ShopChest(inventory, shopSign, left, right);
+                shopData = ShopInventoryName.fromString(inventory.getName());
+                if (shopData == null && SimpleShopPlugin.instance.allowShopSigns) {
+                        shopData = ShopSign.getByChest(left, right);
+                }
+                if (shopData == null) return null;
+                return new ShopChest(inventory, shopData, left, right);
         }
 
         public static ShopChest getBySign(Block block) {
@@ -67,39 +68,39 @@ public class ShopChest {
         }
 
         public String getOwnerName() {
-                return shopSign.getOwnerName();
+                return shopData.getOwnerName();
         }
 
         public Player getOwner() {
-                return shopSign.getOwner();
+                return shopData.getOwner();
         }
 
         public boolean isOwner(Player player) {
-                return shopSign.isOwner(player);
+                return shopData.isOwner(player);
         }
 
         public boolean isAdminChest() {
-                return shopSign.isAdminShop();
+                return shopData.isAdminShop();
         }
 
         public boolean isBuyingChest() {
-                return shopSign.isBuyingShop();
+                return shopData.isBuyingShop();
         }
 
         public void setPrice(double price) {
-                shopSign.setPrice(price);
+                shopData.setPrice(price);
         }
 
         public void setSoldOut() {
-                shopSign.setSoldOut();
+                shopData.setSoldOut();
         }
 
         public double getPrice() {
-                return shopSign.getPrice();
+                return shopData.getPrice();
         }
 
         public boolean isSellingChest() {
-                return shopSign.isSellingShop();
+                return shopData.isSellingShop();
         }
 
         public List<Block> getBlocks() {

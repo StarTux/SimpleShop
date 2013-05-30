@@ -49,7 +49,7 @@ public class SignListener implements Listener {
                 } catch (NumberFormatException nfe) {
                         event.setLine(1, "10");
                 }
-                if (event.getLine(3).equals(ShopSign.getAdminShopName())) {
+                if (event.getLine(3).equals(SimpleShopPlugin.getAdminShopName())) {
                         if (!event.getPlayer().hasPermission("simpleshop.create.admin")) {
                                 event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission");
                                 event.setCancelled(true);

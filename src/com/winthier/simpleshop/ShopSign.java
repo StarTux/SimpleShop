@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 
-public class ShopSign {
+public class ShopSign implements ShopData {
         private Sign sign;
 
         public ShopSign(Sign sign) {
@@ -57,7 +57,7 @@ public class ShopSign {
         }
 
         public boolean isAdminShop() {
-                return getSign().getLine(3).equals(getAdminShopName());
+                return getSign().getLine(3).equals(SimpleShopPlugin.getAdminShopName());
         }
 
         public double getPrice() {
@@ -89,35 +89,19 @@ public class ShopSign {
                 return isSign(block.getType());
         }
 
-        public static String getAdminShopName() {
-                return "The Bank";
-        }
-
-        public static String getShopSignTitle() {
-                return "[shop]";
-        }
-
-        public static String getSellingSignTitle() {
-                return "[buy]";
-        }
-
-        public static String getBuyingSignTitle() {
-                return "[sell]";
-        }
-
         public boolean isBuyingShop() {
-                return getSign().getLine(0).equalsIgnoreCase(getBuyingSignTitle());
+                return getSign().getLine(0).equalsIgnoreCase(SimpleShopPlugin.getBuyingCode());
         }
 
         public boolean isSellingShop() {
-                return getSign().getLine(0).equalsIgnoreCase(getSellingSignTitle()) ||
-                        getSign().getLine(0).equalsIgnoreCase(getShopSignTitle());
+                return getSign().getLine(0).equalsIgnoreCase(SimpleShopPlugin.getSellingCode()) ||
+                        getSign().getLine(0).equalsIgnoreCase(SimpleShopPlugin.getShopCode());
         }
 
         public static boolean isShopTitle(String line) {
-                return (line.equalsIgnoreCase(getSellingSignTitle()) ||
-                        line.equalsIgnoreCase(getBuyingSignTitle()) ||
-                        line.equalsIgnoreCase(getShopSignTitle()));
+                return (line.equalsIgnoreCase(SimpleShopPlugin.getSellingCode()) ||
+                        line.equalsIgnoreCase(SimpleShopPlugin.getBuyingCode()) ||
+                        line.equalsIgnoreCase(SimpleShopPlugin.getShopCode()));
         }
 
         public void setSoldOut() {

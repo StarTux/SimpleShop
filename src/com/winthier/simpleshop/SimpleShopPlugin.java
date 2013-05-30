@@ -77,6 +77,34 @@ public class SimpleShopPlugin extends JavaPlugin {
                 return economy;
         }
 
+        /**
+         * Get the code for the default shop, which sells things
+         * to people.
+         */
+        public static String getShopCode() {
+                return "[shop]";
+        }
+
+        /**
+         * Get the code for a shop which sells things to people,
+         * resp. people buy things from.
+         */
+        public static String getSellingCode() {
+                return "[buy]";
+        }
+
+        /**
+         * Get the code for a shop which buys things from people,
+         * resp. people sell things to.
+         */
+        public static String getBuyingCode() {
+                return "[sell]";
+        }
+
+        public static String getAdminShopName() {
+                return "The Bank";
+        }
+
         public String getItemName(ItemStack item) {
                 try {
                         return Items.itemByStack(item).getName();
