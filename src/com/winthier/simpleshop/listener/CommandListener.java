@@ -14,6 +14,10 @@ public class CommandListener implements CommandExecutor {
                 this.plugin = plugin;
         }
 
+        public void onEnable() {
+                plugin.getCommand("shop").setExecutor(this);
+        }
+
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String args[]) {
                 if (!(sender instanceof Player)) {

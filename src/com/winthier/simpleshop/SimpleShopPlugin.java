@@ -3,6 +3,7 @@ package com.winthier.simpleshop;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.listener.CommandListener;
 import com.winthier.simpleshop.listener.PlayerListener;
+import com.winthier.simpleshop.listener.SignListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -19,8 +20,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SimpleShopPlugin extends JavaPlugin {
-        private PlayerListener playerListener;
-        private CommandListener commandListener;
+        private final PlayerListener playerListener = new PlayerListener(this);
+        private final SignListener signListener = new SignListener(this);
+        private final CommandListener commandListener = new CommandListener(this);
         private Economy economy;
         private Map<String, Double> priceMap = new HashMap<String, Double>();
         private PrintStream simpleShopLog;
@@ -32,10 +34,9 @@ public class SimpleShopPlugin extends JavaPlugin {
                         setEnabled(false);
                         return;
                 }
-                playerListener = new PlayerListener(this);
-                getServer().getPluginManager().registerEvents(playerListener, this);
-                commandListener = new CommandListener(this);
-                getCommand("shop").setExecutor(commandListener);
+                playerListener.onEnable();
+                signListener.onEnable();
+                commandListener.onEnable();
                 try {
                         getDataFolder().mkdirs();
                         simpleShopLog = new PrintStream(new FileOutputStream(new File(getDataFolder(), "SimpleShop.log"), true));
