@@ -2,6 +2,7 @@ package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.event.SimpleShopEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -183,6 +184,7 @@ public class PlayerListener implements Listener {
                                                 owner.sendMessage("" + ChatColor.GREEN + player.getName() + " sold " + soldItem.getAmount() + "x" + plugin.getItemName(soldItem) + " for " + plugin.getEconomy().format(fullPrice) + " to you.");
                                         }
                                         plugin.logSale(shopChest, player.getName(), soldItem, fullPrice);
+                                        plugin.getServer().getPluginManager().callEvent(new SimpleShopEvent(player, shopChest, soldItem, fullPrice));
                                 }
                                 return;
                         }
@@ -242,6 +244,7 @@ public class PlayerListener implements Listener {
                                                 event.setCurrentItem(event.getCurrentItem());
                                         }
                                         plugin.logSale(shopChest, player.getName(), item, price);
+                                        plugin.getServer().getPluginManager().callEvent(new SimpleShopEvent(player, shopChest, item, price));
                                         if (shopChest.isEmpty()) {
                                                 shopChest.setSoldOut();
                                         }
