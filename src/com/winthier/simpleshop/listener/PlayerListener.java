@@ -66,7 +66,7 @@ public class PlayerListener implements Listener {
                                 event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can sell for " + plugin.getEconomy().format(price) + ".");
                         }
                         if (!Double.isNaN(price) && shopChest.isSellingChest()) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can buy sell for " + plugin.getEconomy().format(price) + ".");
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can buy for " + plugin.getEconomy().format(price) + ".");
                         }
                 }
                 event.setCancelled(true);
@@ -104,8 +104,14 @@ public class PlayerListener implements Listener {
                 boolean isTopInventory = (event.getRawSlot() < event.getView().getTopInventory().getSize());
                 boolean isOwner = shopChest.isOwner(player);
                 if (isOwner) return;
+		// cancel everything
+		event.setCancelled(true);
+		ItemStack cursor = event.getCursor().clone();
+		ItemStack current = event.getCurrentItem().clone();
                 // allow left or right clicking in your own inventory
                 if (!event.isShiftClick() && !isTopInventory) {
+			event.setCurrentItem(cursor);
+			event.setCursor(current);
                         return;
                 }
                 // deny clicking items in for non-owners
@@ -119,7 +125,6 @@ public class PlayerListener implements Listener {
                         // fight glitched inventory view as best as possible
                         event.setCursor(event.getCursor());
                         event.setCurrentItem(event.getCurrentItem());
-                        event.setCancelled(true);
                         return;
                 }
                 // shift click item into chest
@@ -127,7 +132,6 @@ public class PlayerListener implements Listener {
                         // deny shift clicking items in for non-owners
                         if (shopChest.isSellingChest()) {
                                 player.sendMessage("" + ChatColor.RED + "You can't put items in.");
-                                event.setCancelled(true);
                                 return;
                         }
                         // try to sell item to chest
@@ -135,13 +139,11 @@ public class PlayerListener implements Listener {
                                 double price = shopChest.getPrice();
                                 if (Double.isNaN(price)) {
                                         player.sendMessage("" + ChatColor.RED + "You can't sell here.");
-                                        event.setCancelled(true);
                                         return;
                                 }
                                 ItemStack buyItem = shopChest.getBuyItem(event.getCurrentItem());
                                 if (buyItem == null) {
                                         player.sendMessage("" + ChatColor.RED + "You can't sell this here.");
-                                        event.setCancelled(true);
                                         return;
                                 }
                                 int sold = 0;
@@ -180,7 +182,6 @@ public class PlayerListener implements Listener {
                                         }
                                         plugin.logSale(shopChest, player.getName(), soldItem, fullPrice);
                                 }
-                                event.setCancelled(true);
                                 return;
                         }
                 }
@@ -203,7 +204,6 @@ public class PlayerListener implements Listener {
                                         player.sendMessage("" + ChatColor.GREEN + "Will pay " + plugin.getEconomy().format(price) + " for this item type.");
                                 }
                         }
-                        event.setCancelled(true);
                         return;
                 }
                 // shift click item out of chest
@@ -213,16 +213,13 @@ public class PlayerListener implements Listener {
                                 double price = shopChest.getPrice();
                                 if (Double.isNaN(price)) {
                                         player.sendMessage("" + ChatColor.RED + "You can't buy here.");
-                                        event.setCancelled(true);
                                         return;
                                 } else if (!plugin.getEconomy().has(player.getName(), price)) {
                                         player.sendMessage("" + ChatColor.RED + "You don't have enough money");
-                                        event.setCancelled(true);
                                         return;
                                 }
                                 if (!plugin.getEconomy().withdrawPlayer(player.getName(), shopChest.getPrice()).transactionSuccess()) {
                                         player.sendMessage("" + ChatColor.RED + "Payment error");
-                                        event.setCancelled(true);
                                         return;
                                 } else {
                                         // purchase made
@@ -231,7 +228,6 @@ public class PlayerListener implements Listener {
                                                 player.getInventory().removeItem(item);
                                                 player.sendMessage("" + ChatColor.RED + "Your inventory is full.");
                                                 plugin.getEconomy().depositPlayer(player.getName(), price);
-                                                event.setCancelled(true);
                                                 return;
                                         }
                                         player.sendMessage("" + ChatColor.GREEN + "Bought for " + plugin.getEconomy().format(price) + ".");
@@ -247,19 +243,14 @@ public class PlayerListener implements Listener {
                                         if (shopChest.isEmpty()) {
                                                 shopChest.setSoldOut();
                                         }
-                                        event.setCancelled(true);
                                         return;
                                 }
                         }
                         if (shopChest.isBuyingChest()) {
                                 player.sendMessage("" + ChatColor.RED + "You can't buy here.");
-                                event.setCancelled(true);
                                 return;
                         }
                 }
-                // deny anything we didn't think of
-                event.setCancelled(true);
-                return;
         }
 
         /**
