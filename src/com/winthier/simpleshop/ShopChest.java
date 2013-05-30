@@ -46,7 +46,7 @@ public class ShopChest {
                         left = block;
                 }
                 shopData = ShopInventoryName.fromString(inventory.getName());
-                if (shopData == null && SimpleShopPlugin.instance.allowShopSigns) {
+                if (shopData == null && SimpleShopPlugin.allowShopSigns()) {
                         shopData = ShopSign.getByChest(left, right);
                 }
                 if (shopData == null) return null;

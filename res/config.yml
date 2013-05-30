@@ -1,1 +1,5 @@
 AllowShopSigns: true
+ShopCode: '[shop]'
+SellingCode: '[buy]'
+BuyingCode: '[sell]'
+AdminShopName: 'The Bank'

@@ -27,8 +27,9 @@ public class SimpleShopPlugin extends JavaPlugin {
         private Map<String, Double> priceMap = new HashMap<String, Double>();
         private PrintStream simpleShopLog;
         // configuration
-        public static SimpleShopPlugin instance;
-        public boolean allowShopSigns;
+        private static SimpleShopPlugin instance;
+        private boolean allowShopSigns;
+        private String shopCode, sellingCode, buyingCode, adminShopName;
 
         @Override
         public void onEnable() {
@@ -36,6 +37,10 @@ public class SimpleShopPlugin extends JavaPlugin {
                 // load config
                 reloadConfig();
                 allowShopSigns = getConfig().getBoolean("AllowShopSigns", true);
+                shopCode = getConfig().getString("ShopCode");
+                sellingCode = getConfig().getString("SellingCode");
+                buyingCode = getConfig().getString("BuyingCode");
+                adminShopName = getConfig().getString("AdminShopName");
                 getConfig().options().copyDefaults(true);
                 saveConfig();
                 // setup economy
@@ -77,12 +82,16 @@ public class SimpleShopPlugin extends JavaPlugin {
                 return economy;
         }
 
+        public static boolean allowShopSigns() {
+                return instance.allowShopSigns;
+        }
+
         /**
          * Get the code for the default shop, which sells things
          * to people.
          */
         public static String getShopCode() {
-                return "[shop]";
+                return instance.shopCode;
         }
 
         /**
@@ -90,7 +99,7 @@ public class SimpleShopPlugin extends JavaPlugin {
          * resp. people buy things from.
          */
         public static String getSellingCode() {
-                return "[buy]";
+                return instance.sellingCode;
         }
 
         /**
@@ -98,11 +107,11 @@ public class SimpleShopPlugin extends JavaPlugin {
          * resp. people sell things to.
          */
         public static String getBuyingCode() {
-                return "[sell]";
+                return instance.buyingCode;
         }
 
         public static String getAdminShopName() {
-                return "The Bank";
+                return instance.adminShopName;
         }
 
         public String getItemName(ItemStack item) {
