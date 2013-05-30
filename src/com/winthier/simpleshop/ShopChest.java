@@ -1,5 +1,6 @@
 package com.winthier.simpleshop;
-
+ 
+import com.winthier.simpleshop.SimpleShopPlugin;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,15 +37,17 @@ public class ShopChest {
                 Inventory inventory = chest.getBlockInventory();
                 Block left = null, right = null;
                 ShopSign shopSign = null;
-                inventory = inventory.getHolder().getInventory();
-                if (inventory instanceof DoubleChestInventory) {
-                        DoubleChest doubleChest = ((DoubleChestInventory)inventory).getHolder();
-                        left = ((Chest)doubleChest.getLeftSide()).getBlock();
-                        right = ((Chest)doubleChest.getRightSide()).getBlock();
-                } else {
-                        left = block;
+                if (SimpleShopPlugin.instance.allowShopSigns) {
+                        inventory = inventory.getHolder().getInventory();
+                        if (inventory instanceof DoubleChestInventory) {
+                                DoubleChest doubleChest = ((DoubleChestInventory)inventory).getHolder();
+                                left = ((Chest)doubleChest.getLeftSide()).getBlock();
+                                right = ((Chest)doubleChest.getRightSide()).getBlock();
+                        } else {
+                                left = block;
+                        }
+                        shopSign = ShopSign.getByChest(left, right);
                 }
-                shopSign = ShopSign.getByChest(left, right);
                 if (shopSign == null) return null;
                 return new ShopChest(inventory, shopSign, left, right);
         }

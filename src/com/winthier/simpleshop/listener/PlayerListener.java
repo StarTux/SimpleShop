@@ -40,7 +40,7 @@ public class PlayerListener implements Listener {
                 if (event.getClickedBlock() == null) return;
                 if (event.getPlayer().isSneaking() && event.getPlayer().getItemInHand() != null) return;
                 ShopChest shopChest = ShopChest.getByChest(event.getClickedBlock());
-                if (shopChest == null) shopChest = ShopChest.getBySign(event.getClickedBlock());
+                if (shopChest == null && plugin.allowShopSigns) shopChest = ShopChest.getBySign(event.getClickedBlock());
                 if (shopChest == null) return;
                 if ((shopChest.isOwner(event.getPlayer()) && event.getPlayer().hasPermission("simpleshop.edit")) ||
                     (!shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.other")) ||

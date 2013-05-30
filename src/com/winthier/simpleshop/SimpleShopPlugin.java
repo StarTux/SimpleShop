@@ -21,21 +21,35 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class SimpleShopPlugin extends JavaPlugin {
         private final PlayerListener playerListener = new PlayerListener(this);
-        private final SignListener signListener = new SignListener(this);
+        private SignListener signListener;
         private final CommandListener commandListener = new CommandListener(this);
         private Economy economy;
         private Map<String, Double> priceMap = new HashMap<String, Double>();
         private PrintStream simpleShopLog;
+        // configuration
+        public static SimpleShopPlugin instance;
+        public boolean allowShopSigns;
 
         @Override
         public void onEnable() {
+                this.instance = this;
+                // load config
+                reloadConfig();
+                allowShopSigns = getConfig().getBoolean("AllowShopSigns", true);
+                getConfig().options().copyDefaults(true);
+                saveConfig();
+                // setup economy
                 if (!setupEconomy()) {
                         getLogger().warning("Failed to setup economy. SimpleShop is not enabled.");
                         setEnabled(false);
                         return;
                 }
+                // setup listeners
                 playerListener.onEnable();
-                signListener.onEnable();
+                if (allowShopSigns) {
+                        signListener = new SignListener(this);
+                        signListener.onEnable();
+                }
                 commandListener.onEnable();
                 try {
                         getDataFolder().mkdirs();
