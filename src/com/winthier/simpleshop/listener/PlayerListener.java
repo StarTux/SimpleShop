@@ -3,6 +3,7 @@ package com.winthier.simpleshop.listener;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
+import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -228,8 +229,12 @@ public class PlayerListener implements Listener {
                                 } else {
                                         // purchase made
                                         ItemStack item = event.getCurrentItem();
-                                        if (!player.getInventory().addItem(item).isEmpty()) {
-                                                player.getInventory().removeItem(item);
+                                        Map<Integer, ItemStack> retours;
+                                        retours = player.getInventory().addItem(item.clone());
+                                        if (!retours.isEmpty()) {
+                                                ItemStack retour = item.clone();
+                                                for (ItemStack is : retours.values()) retour.setAmount(retour.getAmount() - is.getAmount());
+                                                if (retour.getAmount() > 0) player.getInventory().removeItem(retour);
                                                 player.sendMessage("" + ChatColor.RED + "Your inventory is full.");
                                                 plugin.getEconomy().depositPlayer(player.getName(), price);
                                                 return;
