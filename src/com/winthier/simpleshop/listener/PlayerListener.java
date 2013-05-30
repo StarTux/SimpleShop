@@ -1,18 +1,23 @@
 package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.ShopChest;
+import com.winthier.simpleshop.ShopData;
+import com.winthier.simpleshop.ShopInventoryName;
+import com.winthier.simpleshop.ShopSign;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -88,6 +93,39 @@ public class PlayerListener implements Listener {
                         return name + "'";
                 }
                 return name + "'s";
+        }
+
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+        public void onBlockPlace(BlockPlaceEvent event) {
+                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+                Block block = event.getBlock();
+                if (block.getType() != Material.CHEST && block.getType() != Material.TRAPPED_CHEST) return;
+                ShopData shopData = null;
+                shopData = ShopInventoryName.fromItem(event.getPlayer().getItemInHand());
+                if (shopData == null) {
+                        ShopChest shopChest = ShopChest.getByChest(block);
+                        if (shopChest != null) shopData = shopChest.getShopData();
+                }
+                if (shopData == null) {
+                        event.getPlayer().sendMessage("null");
+                        return;
+                }
+                if (!event.getPlayer().hasPermission("simpleshop.create")) {
+                        event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission to create a shop.");
+                        event.setCancelled(true);
+                        return;
+                }
+                if (event.getPlayer().hasPermission("simpleshop.create.other") || shopData.isOwner(event.getPlayer())) {
+                        if (shopData instanceof ShopSign) {
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest. Type " + ChatColor.WHITE + "/shop price [price]" + ChatColor.GREEN + " to change the price");
+                        } else {
+                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest.");
+                        }
+                } else {
+                        event.getPlayer().sendMessage("" + ChatColor.RED + "You cannot create a shop chest for another player.");
+                        event.setCancelled(true);
+                        return;
+                }
         }
 
         /**

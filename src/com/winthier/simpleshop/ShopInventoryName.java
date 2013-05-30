@@ -1,8 +1,10 @@
 package com.winthier.simpleshop;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * ShopData stored in the name of a chest
@@ -41,6 +43,13 @@ public class ShopInventoryName implements ShopData {
                         return null;
                 }
                 return new ShopInventoryName(selling, price, tokens[1]);
+        }
+
+        public static ShopInventoryName fromItem(ItemStack item) {
+                if (item == null) return null;
+                if (item.getType() != Material.CHEST && item.getType() != Material.TRAPPED_CHEST) return null;
+                if (!item.getItemMeta().hasDisplayName()) return null;
+                return fromString(item.getItemMeta().getDisplayName());
         }
 
         @Override

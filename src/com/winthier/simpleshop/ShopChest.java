@@ -156,4 +156,12 @@ public class ShopChest {
         public Inventory getInventory() {
                 return inventory;
         }
+
+        public boolean hasShopSign() {
+                return shopData instanceof ShopSign;
+        }
+
+        public ShopData getShopData() {
+                return shopData;
+        }
 }

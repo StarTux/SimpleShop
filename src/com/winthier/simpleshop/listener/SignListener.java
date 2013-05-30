@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
 /**
@@ -71,17 +70,6 @@ public class SignListener implements Listener {
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop sign. Put a chest underneath to sell things.");
                 } else {
                         event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest. Type " + ChatColor.WHITE + "/shop price [price]" + ChatColor.GREEN + " to change the price");
-                }
-        }
-
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-        public void onBlockPlace(BlockPlaceEvent event) {
-                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
-                if (event.getBlockPlaced().getType() == Material.CHEST) {
-                        ShopChest shopChest = ShopChest.getByChest(event.getBlockPlaced());
-                        if (shopChest != null && event.getPlayer().equals(shopChest.getOwner())) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest. Type " + ChatColor.WHITE + "/shop price [price]" + ChatColor.GREEN + " to change the price");
-                        }
                 }
         }
 }
