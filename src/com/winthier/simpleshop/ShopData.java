@@ -13,6 +13,6 @@ public interface ShopData {
         public boolean isBuyingShop();
         public boolean isSellingShop();
         public double getPrice();
-        public void setPrice(double price);
-        public void setSoldOut();
+        public boolean setPrice(double price);
+        public boolean setSoldOut();
 }

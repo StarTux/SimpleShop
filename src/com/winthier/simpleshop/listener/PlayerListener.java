@@ -54,8 +54,11 @@ public class PlayerListener implements Listener {
                     (shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.admin"))) {
                         Double price = plugin.getPriceMap().get(event.getPlayer().getName());
                         if (price != null) {
-                                shopChest.setPrice(price);
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Price of this shop chest is now " + plugin.getEconomy().format(price) + ".");
+                                if (shopChest.setPrice(price)) {
+                                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "Price of this shop chest is now " + plugin.getEconomy().format(price) + ".");
+                                } else {
+                                        event.getPlayer().sendMessage("" + ChatColor.RED + "You can't change the price of this chest");
+                                }
                                 plugin.getPriceMap().remove(event.getPlayer().getName());
                                 event.setCancelled(true);
                                 return;

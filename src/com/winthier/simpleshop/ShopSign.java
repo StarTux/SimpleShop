@@ -68,7 +68,7 @@ public class ShopSign implements ShopData {
                 }
         }
 
-        public void setPrice(double price) {
+        public boolean setPrice(double price) {
                 if (price < 0.0) price = 0.0;
                 Sign state = getSign();
                 String tag = "" + price;
@@ -79,6 +79,7 @@ public class ShopSign implements ShopData {
                         state.setLine(1, String.format("%.02f", price));
                 }
                 state.update();
+                return true;
         }
 
         public static boolean isSign(Material mat) {
@@ -104,9 +105,10 @@ public class ShopSign implements ShopData {
                         line.equalsIgnoreCase(SimpleShopPlugin.getShopCode()));
         }
 
-        public void setSoldOut() {
+        public boolean setSoldOut() {
                 Sign state = getSign();
                 state.setLine(1, "SOLD OUT");
                 state.update();
+                return true;
         }
 }

@@ -88,10 +88,12 @@ public class ShopInventoryName implements ShopData {
         }
 
         @Override
-        public void setPrice(double price) {
+        public boolean setPrice(double price) {
+                return false;
         }
 
         @Override
-        public void setSoldOut() {
+        public boolean setSoldOut() {
+                return false;
         }
 }

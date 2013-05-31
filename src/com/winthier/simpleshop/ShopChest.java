@@ -87,12 +87,12 @@ public class ShopChest {
                 return shopData.isBuyingShop();
         }
 
-        public void setPrice(double price) {
-                shopData.setPrice(price);
+        public boolean setPrice(double price) {
+                return shopData.setPrice(price);
         }
 
-        public void setSoldOut() {
-                shopData.setSoldOut();
+        public boolean setSoldOut() {
+                return shopData.setSoldOut();
         }
 
         public double getPrice() {
