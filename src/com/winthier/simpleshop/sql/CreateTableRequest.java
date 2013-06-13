@@ -21,8 +21,8 @@ public class CreateTableRequest extends PluginSQLRequest {
                 sb.append(" `time` TIMESTAMP DEFAULT NOW(),");
                 sb.append(" `shop_type` ENUM('buy', 'sell') NOT NULL DEFAULT 'buy',");
                 sb.append(" `player` VARCHAR(16) NOT NULL,");
-                sb.append(" `owner` VARCHAR(16) NOT NULL,");
-                sb.append(" `price` FLOAT(11, 2) NOT NULL,");
+                sb.append(" `owner` VARCHAR(16) DEFAULT NULL,");
+                sb.append(" `price` FLOAT(11, 4) NOT NULL,");
                 sb.append(" `itemid` INT(11) NOT NULL,");
                 sb.append(" `amount` INT(11) NOT NULL,");
                 sb.append(" `itemdata` INT(6) NOT NULL DEFAULT 0,");
@@ -38,7 +38,11 @@ public class CreateTableRequest extends PluginSQLRequest {
                 sb.append(" `x` INT(11) NOT NULL,");
                 sb.append(" `y` INT(11) NOT NULL,");
                 sb.append(" `z` INT(11) NOT NULL,");
-                sb.append(" PRIMARY KEY (`id`)");
+                sb.append(" PRIMARY KEY (`id`),");
+                sb.append(" KEY (`owner`),");
+                sb.append(" KEY (`shop_type`),");
+                sb.append(" KEY `location` (`world`, `x`, `y`, `z`),");
+                sb.append(" KEY (`itemid`)");
                 sb.append(") ENGINE=MyISAM");
                 s = c.createStatement();
                 s.execute(sb.toString());

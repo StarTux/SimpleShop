@@ -43,3 +43,6 @@ permissions:
   simpleshop.import:
     description: Use /shop import
     default: op
+  simpleshop.list.self:
+    description: List your sales
+    default: op

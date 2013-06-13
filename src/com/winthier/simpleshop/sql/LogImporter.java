@@ -23,7 +23,7 @@ public class LogImporter extends BukkitRunnable {
         public void run() {
                 try {
                         plugin.getLogger().info("commencing import");
-                        Pattern pattern = Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2}) \\[(buy|sell)\\] shop='([^']+)' user='([^']+)' item='(\\d+)x(\\d+):(\\d+)' price='([^']+)' location='([^:]+):([^,]+),([^,]+),([^']+)'");
+                        Pattern pattern = Pattern.compile("(\\d{4})-(\\d{2})-(\\d{2}) (\\d{2}):(\\d{2}):(\\d{2}) \\[(buy|sell)\\] shop='([^']*)' user='([^']+)' item='(\\d+)x(\\d+):(\\d+)' price='([^']+)' location='([^:]+):([^,]+),([^,]+),([^']+)'");
                         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(plugin.getDataFolder(), "SimpleShop.log"))));
                         String line;
                         while (null != (line = in.readLine())) {
@@ -41,6 +41,7 @@ public class LogImporter extends BukkitRunnable {
                                 int second = Integer.parseInt(matcher.group(i++));
                                 String shopType = matcher.group(i++);
                                 String owner = matcher.group(i++);
+                                if (owner.length() == 0) owner = null;
                                 String player = matcher.group(i++);
                                 int amount = Integer.parseInt(matcher.group(i++));
                                 int itemid = Integer.parseInt(matcher.group(i++));
