@@ -1,5 +1,6 @@
 package com.winthier.simpleshop;
 
+import com.winthier.simpleshop.sql.SQLLogger;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.listener.CommandListener;
 import com.winthier.simpleshop.listener.PlayerListener;
@@ -7,15 +8,19 @@ import com.winthier.simpleshop.listener.SignListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,11 +30,15 @@ public class SimpleShopPlugin extends JavaPlugin {
         private final CommandListener commandListener = new CommandListener(this);
         private Economy economy;
         private Map<String, Double> priceMap = new HashMap<String, Double>();
-        private PrintStream simpleShopLog;
+        private Map<String, Double> paidMap = new HashMap<String, Double>();
         // configuration
         private static SimpleShopPlugin instance;
-        private boolean allowShopSigns;
+        private boolean allowShopSigns, useItemEconomy;
         private String shopCode, sellingCode, buyingCode, adminShopName;
+        private Map<MaterialData, Double> itemCurrency = new HashMap<MaterialData, Double>();
+        private String currencyName;
+        // sql
+        public SQLLogger sqlLogger;
 
         @Override
         public void onEnable() {
@@ -41,13 +50,27 @@ public class SimpleShopPlugin extends JavaPlugin {
                 sellingCode = getConfig().getString("SellingCode");
                 buyingCode = getConfig().getString("BuyingCode");
                 adminShopName = getConfig().getString("AdminShopName");
-                getConfig().options().copyDefaults(true);
-                saveConfig();
+                useItemEconomy = getConfig().getBoolean("UseItemEconomy");
                 // setup economy
-                if (!setupEconomy()) {
-                        getLogger().warning("Failed to setup economy. SimpleShop is not enabled.");
-                        setEnabled(false);
-                        return;
+                if (useItemEconomy) {
+                        ConfigurationSection currencySection = getConfig().getConfigurationSection("currency");
+                        for (String key : currencySection.getKeys(false)) {
+                                ItemInfo info = Items.itemByString(key);
+                                if (info == null) {
+                                        getLogger().warning(currencySection.getCurrentPath() + ": invalid item type: " + key);
+                                        continue;
+                                }
+                                MaterialData md = new MaterialData(info.getType(), (byte)info.getSubTypeId());
+                                double value = currencySection.getDouble(key);
+                                if (currencyName == null || value == 1.0) currencyName = key;
+                                itemCurrency.put(md, value);
+                        }
+                } else {
+                        if (!setupEconomy()) {
+                                getLogger().warning("Failed to setup economy. SimpleShop is not enabled.");
+                                setEnabled(false);
+                                return;
+                        }
                 }
                 // setup listeners
                 playerListener.onEnable();
@@ -56,17 +79,19 @@ public class SimpleShopPlugin extends JavaPlugin {
                         signListener.onEnable();
                 }
                 commandListener.onEnable();
-                try {
-                        getDataFolder().mkdirs();
-                        simpleShopLog = new PrintStream(new FileOutputStream(new File(getDataFolder(), "SimpleShop.log"), true));
-                } catch (FileNotFoundException fnfe) {
-                        getLogger().warning("Could not open `SimpleShop.log' for writing: " + fnfe.getMessage());
+                // setup sql logging
+                if (getConfig().getBoolean("sql.enable")) {
+                        sqlLogger = new SQLLogger(this, getConfig().getConfigurationSection("sql"));
+                        sqlLogger.onEnable();
                 }
+                getConfig().options().copyDefaults(true);
+                saveConfig();
         }
 
         @Override
         public void onDisable() {
-                if (simpleShopLog != null) simpleShopLog.close();
+                if (sqlLogger != null) sqlLogger.onDisable();
+                currencyName = null;
         }
 
         private boolean setupEconomy()
@@ -78,8 +103,8 @@ public class SimpleShopPlugin extends JavaPlugin {
                 return (economy != null);
         }
 
-        public Economy getEconomy() {
-                return economy;
+        public static Economy getEconomy() {
+                return instance.economy;
         }
 
         public static boolean allowShopSigns() {
@@ -112,6 +137,20 @@ public class SimpleShopPlugin extends JavaPlugin {
 
         public static String getAdminShopName() {
                 return instance.adminShopName;
+        }
+
+        public static String formatPrice(double price) {
+                if (instance.useItemEconomy) {
+                        String tag = "" + price;
+                        String tags[] = tag.split("\\.");
+                        if (tags.length == 2 && tags[1].equals("0")) {
+                                return "" + tags[0] + " " + instance.currencyName;
+                        } else {
+                                return String.format("%.02f ", price) + instance.currencyName;
+                        }
+                } else {
+                        return instance.economy.format(price);
+                }
         }
 
         public String getItemName(ItemStack item) {
@@ -147,14 +186,75 @@ public class SimpleShopPlugin extends JavaPlugin {
                                      cal.get(Calendar.SECOND));
         }
 
+        public static boolean useItemEconomy() {
+                return instance.useItemEconomy;
+        }
+
+        public static double getCurrencyValue(MaterialData mat) {
+                Double tmp = instance.itemCurrency.get(mat);
+                return tmp == null ? 0.0 : tmp;
+        }
+
+        public static double addPaidItems(Player player, double amount) {
+                Double tmp = instance.paidMap.get(player.getName());
+                double total = tmp == null ? 0.0 : tmp;
+                total += amount;
+                instance.paidMap.put(player.getName(), total);
+                return total;
+        }
+
+        public static double getPaidItems(Player player) {
+                Double tmp = instance.paidMap.get(player.getName());
+                return tmp == null ? 0.0 : instance.paidMap.get(player.getName());
+        }
+
+        public static void resetPaidItems(Player player) {
+                instance.paidMap.remove(player.getName());
+        }
+
+        public static boolean hasMoney(Player player, double amount) {
+                if (instance.useItemEconomy) {
+                        return getPaidItems(player) >= amount;
+                } else {
+                        return instance.economy.has(player.getName(), amount);
+                }
+        }
+
+        public static void giveMoney(Player player, double amount) {
+                if (instance.useItemEconomy) {
+                        addPaidItems(player, amount);
+                } else {
+                        instance.economy.depositPlayer(player.getName(), amount);
+                }
+        }
+
+        public static boolean takeMoney(Player player, double amount) {
+                if (instance.useItemEconomy) {
+                        if (!hasMoney(player, amount)) return false;
+                        addPaidItems(player, -amount);
+                        return true;
+                } else {
+                        return instance.economy.withdrawPlayer(player.getName(), amount).transactionSuccess();
+                }
+        }
+
+        public static Set<MaterialData> getCurrencyItems() {
+                return instance.itemCurrency.keySet();
+        }
+
         public void logSale(ShopChest shop, String user, ItemStack item, double price) {
-                if (simpleShopLog == null) return;
+                String itemName;
+                ItemInfo info = Items.itemByStack(item);
+                if (info != null) {
+                        itemName = info.toString();
+                } else {
+                        itemName = item.getType().name().toLowerCase();
+                        if (item.getDurability() != 0) itemName += ":" + item.getDurability();
+                }
                 final String time = getTimeString();
                 final String shopType = shop.isSellingChest() ? "buy" : "sell";
                 final String shopDirection = shop.isSellingChest() ? "from" : "to";
                 final Location loc = shop.getLocation();
-                simpleShopLog.format("%s [%s] shop='%s' user='%s' item='%dx%d:%d' price='%.02f' location='%s:%d,%d,%d'\n", time, shopType, shop.getOwnerName(), user, item.getAmount(), item.getTypeId(), item.getDurability(), price, loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-
-                getLogger().info(String.format("[%s] '%s' %dx%d:%d for %.02f %s %s at %s:%d,%d,%d", shopType, user, item.getAmount(), item.getTypeId(), item.getDurability(), price, shopDirection, shop.getOwnerName(), loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+                getLogger().info(String.format("[%s] '%s' %dx%s for %.02f %s %s at %s:%d,%d,%d", shopType, user, item.getAmount(), itemName, price, shopDirection, shop.getOwnerName(), loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
         }
 }

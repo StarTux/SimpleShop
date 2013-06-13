@@ -15,4 +15,5 @@ public interface ShopData {
         public double getPrice();
         public boolean setPrice(double price);
         public boolean setSoldOut();
+        public boolean hasOwner();
 }

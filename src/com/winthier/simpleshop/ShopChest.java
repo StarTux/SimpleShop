@@ -1,9 +1,13 @@
 package com.winthier.simpleshop;
  
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.griefprevention.GriefPreventionHelper;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,7 +17,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 
 /**
  * Holder of non-unique data related to one chest representing a
@@ -67,6 +73,10 @@ public class ShopChest {
                 return null;
         }
 
+        public boolean hasOwner() {
+                return shopData.hasOwner();
+        }
+
         public String getOwnerName() {
                 return shopData.getOwnerName();
         }
@@ -76,6 +86,10 @@ public class ShopChest {
         }
 
         public boolean isOwner(Player player) {
+                if (!shopData.hasOwner()) {
+                        if (SimpleShopPlugin.useItemEconomy()) return GriefPreventionHelper.canBuild(player, left.getLocation());
+                        return false;
+                }
                 return shopData.isOwner(player);
         }
 
@@ -151,6 +165,47 @@ public class ShopChest {
                         }
                 }
                 return null;
+        }
+
+        public void giveOwnerMoney(double price) {
+                if (SimpleShopPlugin.useItemEconomy()) {
+                        return;
+                } else {
+                        SimpleShopPlugin.getEconomy().depositPlayer(getOwnerName(), price);
+                }
+        }
+
+        public void takeItemCurrency(Player player, double amount) {
+                MaterialData mats[] = SimpleShopPlugin.getCurrencyItems().toArray(new MaterialData[0]);
+                Arrays.sort(mats, new Comparator<MaterialData>() {
+                                public int compare(MaterialData a, MaterialData b) {
+                                        double aa = SimpleShopPlugin.getCurrencyValue(a);
+                                        double bb = SimpleShopPlugin.getCurrencyValue(b);
+                                        return Double.compare(aa, bb);
+                                }
+                        });
+                for (int i = mats.length - 1; i >= 0; --i) {
+                        MaterialData mat = mats[i];
+                        double value = SimpleShopPlugin.getCurrencyValue(mat);
+                        int needed = (int)(amount / value);
+                itemLoop:
+                        for (int j = inventory.getSize() - 1; j >= 0; --j) {
+                                if (needed == 0) break itemLoop;
+                                ItemStack item = inventory.getItem(j);
+                                if (item == null || !item.getData().equals(mat)) continue itemLoop;
+                                int take = Math.min(needed, item.getAmount());
+                                if (take > 0) {
+                                        if (item.getAmount() == take) {
+                                                inventory.setItem(j, null);
+                                        } else {
+                                                item.setAmount(item.getAmount() - take);
+                                        }
+                                        amount -= value * take;
+                                        needed -= take;
+                                        player.getWorld().dropItem(player.getEyeLocation(), new ItemStack(mat.getItemType(), take, (short)mat.getData()));
+                                }
+                        }
+                }
         }
 
         public Inventory getInventory() {

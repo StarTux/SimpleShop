@@ -46,6 +46,11 @@ public class ShopSign implements ShopData {
                 return getSign().getLine(3) + getSign().getLine(2);
         }
 
+        @Override
+        public boolean hasOwner() {
+                return true;
+        }
+
         public Player getOwner() {
                 if (isAdminShop()) return null;
                 return Bukkit.getServer().getPlayerExact(getOwnerName());

@@ -20,21 +20,28 @@ public class ShopInventoryName implements ShopData {
                 this.owner = owner;
         }
 
+        private static boolean startsWithIgnoreCase(String longString, String shortString) {
+                if (shortString.length() > longString.length()) return false;
+                if (shortString.length() == longString.length()) return longString.equalsIgnoreCase(shortString);
+                String testString = longString.substring(0, shortString.length());
+                return testString.equalsIgnoreCase(shortString);
+        }
+
         public static ShopInventoryName fromString (String name) {
                 String code;
                 boolean selling;
-                if (name.startsWith((code = SimpleShopPlugin.getShopCode()))) {
+                if (startsWithIgnoreCase(name, (code = SimpleShopPlugin.getShopCode()))) {
                         selling = true;
-                } else if (name.startsWith((code = SimpleShopPlugin.getSellingCode()))) {
+                } else if (startsWithIgnoreCase(name, (code = SimpleShopPlugin.getSellingCode()))) {
                         selling = true;
-                } else if (name.startsWith((code = SimpleShopPlugin.getBuyingCode()))) {
+                } else if (startsWithIgnoreCase(name, (code = SimpleShopPlugin.getBuyingCode()))) {
                         selling = false;
                 } else {
                         return null;
                 }
                 name = name.substring(code.length() + 1);
                 String tokens[] = name.split(" ", 2);
-                if (tokens.length != 2) return null;
+                if (tokens.length != 2 && !SimpleShopPlugin.useItemEconomy()) return null;
                 double price;
                 try {
                         price = Double.parseDouble(tokens[0]);
@@ -42,7 +49,9 @@ public class ShopInventoryName implements ShopData {
                 } catch (NumberFormatException nfe) {
                         return null;
                 }
-                return new ShopInventoryName(selling, price, tokens[1]);
+                String owner = null;
+                if (tokens.length >= 2) owner = tokens[1];
+                return new ShopInventoryName(selling, price, owner);
         }
 
         public static ShopInventoryName fromItem(ItemStack item) {
@@ -54,22 +63,31 @@ public class ShopInventoryName implements ShopData {
 
         @Override
         public String getOwnerName() {
+                if (owner == null) return "Some Player";
                 return owner;
         }
 
         @Override
         public Player getOwner() {
-                return Bukkit.getServer().getPlayerExact(getOwnerName());
+                if (owner == null) return null;
+                return Bukkit.getServer().getPlayerExact(owner);
+        }
+
+        @Override
+        public boolean hasOwner() {
+                return owner != null;
         }
 
         @Override
         public boolean isOwner(Player player) {
-                return getOwnerName().equals(player.getName());
+                if (owner == null) return false;
+                return player.getName().equals(owner);
         }
 
         @Override
         public boolean isAdminShop() {
-                return getOwnerName().equals(SimpleShopPlugin.getAdminShopName());
+                if (owner == null) return false;
+                return SimpleShopPlugin.getAdminShopName().equals(owner);
         }
 
         @Override

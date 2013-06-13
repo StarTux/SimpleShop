@@ -3,3 +3,9 @@ ShopCode: '[shop]'
 SellingCode: '[buy]'
 BuyingCode: '[sell]'
 AdminShopName: 'The Bank'
+UseItemEconomy: false
+currency:
+  Emerald: 1
+  Emerald_Block: 9
+sql:
+  enable: false

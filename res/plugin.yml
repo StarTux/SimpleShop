@@ -1,8 +1,8 @@
 name: SimpleShop
 description: Sell items via chests
-version: 0.1
+version: 0.2
 author: StarTux
-depend: [ Vault ]
+depend: [ Vault, GriefPrevention ]
 main: com.winthier.simpleshop.SimpleShopPlugin
 commands:
   shop:
@@ -21,6 +21,7 @@ permissions:
       simpleshop.edit.admin: true
       simpleshop.create.other: true
       simpleshop.edit.other: true
+      simpleshop.import: true
   simpleshop.create:
     description: Create a shop
     default: true
@@ -38,4 +39,7 @@ permissions:
     default: op
   simpleshop.edit.admin:
     description: Edit the price tag of an admin shop
+    default: op
+  simpleshop.import:
+    description: Use /shop import
     default: op

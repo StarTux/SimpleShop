@@ -1,6 +1,7 @@
 package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.sql.LogImporter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,14 +21,15 @@ public class CommandListener implements CommandExecutor {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String args[]) {
-                if (!(sender instanceof Player)) {
-                        sender.sendMessage("Player expected");
-                        return true;
-                }
-                Player player = (Player)sender;
+                Player player = null;
+                if (sender instanceof Player) player = (Player)player;
                 if (args.length == 2 && args[0].equalsIgnoreCase("price")) {
-                        if (!player.hasPermission("simpleshop.edit")) {
-                                player.sendMessage("" + ChatColor.RED + "You don't have permission");
+                        if (!sender.hasPermission("simpleshop.edit")) {
+                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                return true;
+                        }
+                        if (player == null) {
+                                sender.sendMessage("Player expected");
                                 return true;
                         }
                         double price = 0.0;
@@ -43,6 +45,14 @@ public class CommandListener implements CommandExecutor {
                         }
                         plugin.getPriceMap().put(player.getName(), price);
                         player.sendMessage("" + ChatColor.RED + "Open one of your shop chest to set its price to " + plugin.getEconomy().format(price) + ".");
+                } else if (args.length == 1 && args[0].equals("import")) {
+                        if (!sender.hasPermission("simpleshop.import")) {
+                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                return true;
+                        }
+                        LogImporter task = new LogImporter(plugin);
+                        task.start();
+                        sender.sendMessage("import started");
                 } else {
                         sender.sendMessage("" + ChatColor.GREEN + "SimpleShop help");
                         sender.sendMessage(ChatColor.WHITE + "/shop price [price] " + ChatColor.GREEN + "Set the price");
