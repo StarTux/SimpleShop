@@ -1,13 +1,11 @@
 package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.SimpleShopPlugin;
-import com.winthier.simpleshop.sql.LogImporter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import com.winthier.simpleshop.sql.ListTransactionsRequest;
 
 public class CommandListener implements CommandExecutor {
         private SimpleShopPlugin plugin;
@@ -27,7 +25,7 @@ public class CommandListener implements CommandExecutor {
                 if (args.length == 0) {
                         sender.sendMessage("" + ChatColor.GREEN + "SimpleShop help");
                         sender.sendMessage(ChatColor.WHITE + "/shop price [price] " + ChatColor.GREEN + "- Set the price");
-                        if (plugin.sqlLogger != null) {
+                        if (plugin.sqlManager != null) {
                                 sender.sendMessage(ChatColor.WHITE + "/shop list [page] " + ChatColor.GREEN + "- List sales");
                         }
                         return true;
@@ -59,11 +57,10 @@ public class CommandListener implements CommandExecutor {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission");
                                 return true;
                         }
-                        LogImporter task = new LogImporter(plugin);
-                        task.start();
                         sender.sendMessage("import started");
                         return true;
                 } else if ((args.length >= 1 || args.length <= 3) && args[0].equals("list")) {
+                        if (plugin.sqlManager == null) return false;
                         if (!sender.hasPermission("simpleshop.list.self")) {
                                 sender.sendMessage("" + ChatColor.RED + "You don't have permission");
                                 return true;
@@ -77,15 +74,11 @@ public class CommandListener implements CommandExecutor {
                                         sender.sendMessage("" + ChatColor.RED + "Page number expected: " + args[1]);
                                 }
                         }
-                        if (player != null) listTransactions(sender, player.getName(), page);
-                        else listTransactions(sender, SimpleShopPlugin.getAdminShopName(), page);
+                        if (player != null) plugin.sqlManager.listTransactions(sender, player.getName(), page);
+                        else plugin.sqlManager.listTransactions(sender, SimpleShopPlugin.getAdminShopName(), page);
                         return true;
                 }
                 return false;
         }
 
-        public void listTransactions(CommandSender sender, String name, int page) {
-                ListTransactionsRequest request = new ListTransactionsRequest(plugin, sender, name, page);
-                plugin.sqlLogger.connectionManager.queueRequest(request);
-        }
 }

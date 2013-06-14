@@ -1,10 +1,10 @@
 package com.winthier.simpleshop;
 
-import com.winthier.simpleshop.sql.SQLLogger;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.listener.CommandListener;
 import com.winthier.simpleshop.listener.PlayerListener;
 import com.winthier.simpleshop.listener.SignListener;
+import com.winthier.simpleshop.sql.SQLManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,7 +38,7 @@ public class SimpleShopPlugin extends JavaPlugin {
         private Map<MaterialData, Double> itemCurrency = new HashMap<MaterialData, Double>();
         private String currencyName;
         // sql
-        public SQLLogger sqlLogger;
+        public SQLManager sqlManager;
 
         @Override
         public void onEnable() {
@@ -81,8 +81,8 @@ public class SimpleShopPlugin extends JavaPlugin {
                 commandListener.onEnable();
                 // setup sql logging
                 if (getConfig().getBoolean("sql.enable")) {
-                        sqlLogger = new SQLLogger(this, getConfig().getConfigurationSection("sql"));
-                        sqlLogger.onEnable();
+                        sqlManager = new SQLManager(this);
+                        sqlManager.onEnable();
                 }
                 getConfig().options().copyDefaults(true);
                 saveConfig();
@@ -90,7 +90,7 @@ public class SimpleShopPlugin extends JavaPlugin {
 
         @Override
         public void onDisable() {
-                if (sqlLogger != null) sqlLogger.onDisable();
+                if (sqlManager != null) sqlManager.onDisable();
                 currencyName = null;
         }
 

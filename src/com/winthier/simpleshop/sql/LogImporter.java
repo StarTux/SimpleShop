@@ -1,5 +1,6 @@
 package com.winthier.simpleshop.sql;
 
+import com.winthier.libsql.ConnectionManager;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,9 +15,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class LogImporter extends BukkitRunnable {
         private SimpleShopPlugin plugin;
+        private ConnectionManager connectionManager;
 
-        public LogImporter(SimpleShopPlugin plugin) {
+        public LogImporter(SimpleShopPlugin plugin, ConnectionManager connectionManager) {
                 this.plugin = plugin;
+                this.connectionManager = connectionManager;
         }
 
         @Override
@@ -56,7 +59,7 @@ public class LogImporter extends BukkitRunnable {
                                 ItemStack item = new ItemStack(itemid, amount, (short)itemdata);
                                 LogTransactionRequest request;
                                 request = new LogTransactionRequest(plugin, cal.getTime(), shopType, player, owner, price, item, world, x, y, z);
-                                while (!plugin.sqlLogger.connectionManager.queueRequest(request)) {
+                                while (!connectionManager.queueRequest(request)) {
                                         plugin.getLogger().info("queue full. sleeping 1 second...");
                                         Thread.sleep(1000);
                                 }

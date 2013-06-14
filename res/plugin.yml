@@ -3,6 +3,7 @@ description: Sell items via chests
 version: 0.2
 author: StarTux
 depend: [ Vault, GriefPrevention ]
+softdepend: [ LibSQL ]
 main: com.winthier.simpleshop.SimpleShopPlugin
 commands:
   shop:
