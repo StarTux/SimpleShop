@@ -1,11 +1,14 @@
 package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.Util;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class CommandListener implements CommandExecutor {
         private SimpleShopPlugin plugin;
@@ -23,10 +26,11 @@ public class CommandListener implements CommandExecutor {
                 Player player = null;
                 if (sender instanceof Player) player = (Player)sender;
                 if (args.length == 0) {
-                        sender.sendMessage("" + ChatColor.GREEN + "SimpleShop help");
-                        sender.sendMessage(ChatColor.WHITE + "/shop price [price] " + ChatColor.GREEN + "- Set the price");
+                        Util.sendMessage(sender, "&e* &lSimpleShop help&e *");
+                        Util.sendMessage(sender, "&e/shop &6price [price]&r - Set the price");
                         if (plugin.sqlManager != null) {
-                                sender.sendMessage(ChatColor.WHITE + "/shop list [page] " + ChatColor.GREEN + "- List sales");
+                                Util.sendMessage(sender, "&e/shop &6list [page]&r - List sales");
+                                Util.sendMessage(sender, "&e/shop &6avg&r - Get average price of item in hand");
                         }
                         return true;
                 } else if (args.length == 2 && args[0].equals("price")) {
@@ -35,7 +39,7 @@ public class CommandListener implements CommandExecutor {
                                 return true;
                         }
                         if (player == null) {
-                                sender.sendMessage("Player expected");
+                                Util.sendMessage(sender, "&cPlayer expected.");
                                 return true;
                         }
                         double price = 0.0;
@@ -77,8 +81,20 @@ public class CommandListener implements CommandExecutor {
                         if (player != null) plugin.sqlManager.listTransactions(sender, player.getName(), page);
                         else plugin.sqlManager.listTransactions(sender, SimpleShopPlugin.getAdminShopName(), page);
                         return true;
+                } else if (args.length == 1 && (args[0].equals("avg") || args[0].equals("average"))) {
+                        if (plugin.sqlManager == null) return false;
+                        if (player == null) {
+                                Util.sendMessage(sender, "&cPlayer expected.");
+                                return true;
+                        }
+                        ItemStack item = player.getItemInHand();
+                        if (item == null || item.getType() == Material.AIR) {
+                                Util.sendMessage(sender, "&cHold the item to check in your hand.");
+                                return true;
+                        }
+                        plugin.sqlManager.sendAveragePrice(sender, item);
+                        return true;
                 }
                 return false;
         }
-
 }

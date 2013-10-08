@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 public class SQLManager implements Listener {
         private SimpleShopPlugin plugin;
@@ -42,6 +43,11 @@ public class SQLManager implements Listener {
 
         public void listTransactions(CommandSender sender, String name, int page) {
                 ListTransactionsRequest request = new ListTransactionsRequest(plugin, sender, name, page);
+                connectionManager.queueRequest(request);
+        }
+
+        public void sendAveragePrice(CommandSender sender, ItemStack item) {
+                AveragePriceRequest request = new AveragePriceRequest(plugin, sender, item);
                 connectionManager.queueRequest(request);
         }
 }

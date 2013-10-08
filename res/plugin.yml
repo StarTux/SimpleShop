@@ -47,3 +47,6 @@ permissions:
   simpleshop.list.self:
     description: List your sales
     default: op
+  simpleshop.average:
+    description: Lookup the average price via /shop avg
+    default: op
