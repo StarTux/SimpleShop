@@ -159,7 +159,7 @@ public class PlayerListener implements Listener {
          * Allow dragging if it's only in the bottom inventory.
          * Ignore if player is owner or in creative.
          */
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onInventoryDrag(InventoryDragEvent event) {
                 ShopChest shopChest = ShopChest.getByInventory(event.getInventory());
                 if (shopChest == null) return;
@@ -185,7 +185,7 @@ public class PlayerListener implements Listener {
          * causes a purchase, we do the work manually instead of
          * relying on vanilla logic.
          */
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onInventoryClick(InventoryClickEvent event) {
                 if (event.getSlotType() == InventoryType.SlotType.OUTSIDE) return;
                 if (event.getRawSlot() < 0) return;
