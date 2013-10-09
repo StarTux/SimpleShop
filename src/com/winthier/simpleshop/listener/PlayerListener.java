@@ -22,6 +22,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +36,21 @@ public class PlayerListener implements Listener {
 
         public void onEnable() {
                 plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        }
+
+        /**
+         * Protect against hoppers.
+         */
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+        public void onInventoryMove(InventoryMoveItemEvent event) {
+                if (ShopChest.getByInventory(event.getSource()) != null) {
+                        event.setCancelled(true);
+                        return;
+                }
+                if (ShopChest.getByInventory(event.getDestination()) != null) {
+                        event.setCancelled(true);
+                        return;
+                }
         }
 
         /**
