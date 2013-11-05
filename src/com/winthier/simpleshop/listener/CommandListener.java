@@ -57,13 +57,6 @@ public class CommandListener implements CommandExecutor {
                         plugin.getPriceMap().put(player.getName(), price);
                         Util.sendMessage(player, "&cOpen one of your shop chest to set its price to .", plugin.formatPrice(price));
                         return true;
-                } else if (args.length == 1 && args[0].equals("import")) {
-                        if (!sender.hasPermission("simpleshop.import")) {
-                                Util.sendMessage(sender, "&cYou don't have permission");
-                                return true;
-                        }
-                        Util.sendMessage(sender, "import started");
-                        return true;
                 } else if ((args.length >= 1 || args.length <= 3) && args[0].equals("list")) {
                         if (plugin.sqlManager == null) return false;
                         if (!sender.hasPermission("simpleshop.list.self")) {
@@ -106,6 +99,14 @@ public class CommandListener implements CommandExecutor {
                                 }
                         }
                         plugin.sqlManager.sendAveragePrice(sender, item, days);
+                        return true;
+                } else if (args.length == 1 && args[0].equals("update")) {
+                        if (!sender.hasPermission("simpleshop.admin")) {
+                                Util.sendMessage(sender, "&cYou don't have permission");
+                                return true;
+                        }
+                        plugin.sqlManager.updateTable();
+                        Util.sendMessage(sender, "&bTable updated. See console.");
                         return true;
                 }
                 return false;

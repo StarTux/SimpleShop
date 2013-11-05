@@ -1,6 +1,6 @@
 package com.winthier.simpleshop.sql;
 
-import com.winthier.libsql.PluginSQLRequest;
+import com.winthier.libsql.SQLRequest;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.Util;
 import java.sql.Connection;
@@ -21,13 +21,18 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
-public class ListTransactionsRequest extends PluginSQLRequest {
-        private CommandSender sender;
-        private String owner;
-        private int page;
-        private int count;
+public class ListTransactionsRequest extends BukkitRunnable implements SQLRequest {
+        private final SimpleShopPlugin plugin;
+        private final CommandSender sender;
+        private final String owner;
+        private final int page;
         public static final int PAGE_SIZE = 10;
+
+        // Result
+        private ResultSet result = null;
+        private int count;
         private static Map<Integer, String> enchantmentNameMap = new HashMap<Integer, String>();
 
         private static void addMapping(Enchantment enchantment, String name) {
@@ -66,7 +71,7 @@ public class ListTransactionsRequest extends PluginSQLRequest {
         }
 
         public ListTransactionsRequest(SimpleShopPlugin plugin, CommandSender sender, String owner, int page) {
-                super(plugin);
+                this.plugin = plugin;
                 this.sender = sender;
                 this.owner = owner;
                 this.page = page;
@@ -93,18 +98,32 @@ public class ListTransactionsRequest extends PluginSQLRequest {
                 s.setString(i++, owner);
                 s.setInt(i++, page * PAGE_SIZE);
                 s.setInt(i++, PAGE_SIZE);
-                result = s.executeQuery();
-                callback(result);
+                this.result = s.executeQuery();
+                runTask(plugin);
         }
 
         @Override
+        public void run() {
+                try {
+                        result(result);
+                } catch (SQLException sqle) {
+                        sqle.printStackTrace();
+                }
+        }
+
         public void result(ResultSet result) throws SQLException {
                 Util.sendMessage(sender, "&bTransaction log for %s (page %d/%d)", owner, page + 1, (count - 1) / PAGE_SIZE + 1);
                 while (result.next()) {
                         String name;
-                        ItemInfo info = Items.itemById(result.getInt("itemid"), (short)result.getInt("itemdata"));
+                        final String matName = result.getString("material");
+                        final Material mat = Material.matchMaterial(matName);
+                        if (mat == null) {
+                                System.err.println("[SimpleShop] invalid material in database: " + matName);
+                                continue;
+                        }
+                        ItemInfo info = Items.itemByType(mat, (short)result.getInt("itemdata"));
                         if (info == null) {
-                                name = "" + Material.getMaterial(result.getInt("itemid")) + ":" + result.getInt("itemdata");
+                                name = "" + matName + ":" + result.getInt("itemdata");
                         } else {
                                 name = info.getName();
                         }

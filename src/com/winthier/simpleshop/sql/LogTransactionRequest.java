@@ -1,7 +1,6 @@
 package com.winthier.simpleshop.sql;
 
-import com.winthier.libsql.PluginSQLRequest;
-import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.libsql.SQLRequest;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class LogTransactionRequest extends PluginSQLRequest {
+public class LogTransactionRequest implements SQLRequest {
         private Timestamp timestamp;
         private String shopType;
         private String player, owner;
@@ -26,8 +25,7 @@ public class LogTransactionRequest extends PluginSQLRequest {
         private String world;
         private int x, y, z;
 
-        LogTransactionRequest(SimpleShopPlugin plugin, SimpleShopEvent event) {
-                super(plugin);
+        LogTransactionRequest(SimpleShopEvent event) {
                 shopType = event.getShopChest().isSellingChest() ? "buy" : "sell";
                 item = event.getItem();
                 player = event.getPlayer().getName();
@@ -39,8 +37,7 @@ public class LogTransactionRequest extends PluginSQLRequest {
                 price = event.getPrice();
         }
 
-        LogTransactionRequest(SimpleShopPlugin plugin, Date timestamp, String shopType, String player, String owner, double price, ItemStack item, String world, int x, int y, int z) {
-                super(plugin);
+        LogTransactionRequest(Date timestamp, String shopType, String player, String owner, double price, ItemStack item, String world, int x, int y, int z) {
                 this.timestamp = new Timestamp(timestamp.getTime());
                 this.shopType = shopType;
                 this.player = player;
@@ -94,7 +91,7 @@ public class LogTransactionRequest extends PluginSQLRequest {
                 sb.append(" player=?,");
                 if (owner != null) sb.append(" owner=?,");
                 sb.append(" price=?,");
-                sb.append(" itemid=?,");
+                sb.append(" material=?,");
                 sb.append(" amount=?,");
                 sb.append(" itemdata=?,");
                 if (displayName != null) sb.append(" display_name=?,");
@@ -119,7 +116,9 @@ public class LogTransactionRequest extends PluginSQLRequest {
                 s.setString(i++, player);
                 if (owner != null) s.setString(i++, owner);
                 s.setDouble(i++, price);
-                s.setInt(i++, item.getTypeId());
+                String mat = item.getType().name().toLowerCase();
+                if (mat.length() > 32) mat = mat.substring(0, 32);
+                s.setString(i++, mat);
                 s.setInt(i++, item.getAmount());
                 s.setInt(i++, item.getDurability());
                 if (displayName != null) s.setString(i++, displayName);

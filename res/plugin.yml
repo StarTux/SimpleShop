@@ -22,7 +22,7 @@ permissions:
       simpleshop.edit.admin: true
       simpleshop.create.other: true
       simpleshop.edit.other: true
-      simpleshop.import: true
+      simpleshop.update: true
   simpleshop.create:
     description: Create a shop
     default: true
@@ -42,7 +42,7 @@ permissions:
     description: Edit the price tag of an admin shop
     default: op
   simpleshop.import:
-    description: Use /shop import
+    description: Update the database schema for SimpleShop v0.3
     default: op
   simpleshop.list.self:
     description: List your sales

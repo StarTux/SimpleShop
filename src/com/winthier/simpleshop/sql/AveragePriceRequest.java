@@ -37,7 +37,7 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
         public void execute(Connection c) throws SQLException {
                 StringBuilder sb = new StringBuilder();
                 sb.append("SELECT COUNT(*) AS sample, sum(`price`) AS `price`, sum(`amount`) AS `amount` FROM `simpleshop_transactions`");
-                sb.append(" WHERE `itemid` = ").append(item.getTypeId());
+                sb.append(" WHERE `material` = '").append(item.getType().name().toLowerCase()).append("'");
                 sb.append(" AND `itemdata` = ").append((int)item.getDurability());
                 sb.append(" AND `time` > DATE_SUB(NOW(), INTERVAL ").append(days).append(" DAY)");
                 Map<Enchantment, Integer> enchantments = null;

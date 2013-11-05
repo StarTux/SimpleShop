@@ -1,7 +1,6 @@
 package com.winthier.simpleshop.sql;
 
 import com.winthier.libsql.ConnectionManager;
-import com.winthier.libsql.PluginSQLRequest;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import org.bukkit.command.CommandSender;
@@ -22,7 +21,7 @@ public class SQLManager implements Listener {
 
         public void onEnable() {
                 connectionManager.start();
-                connectionManager.queueRequest(new CreateTableRequest(plugin));
+                connectionManager.queueRequest(new CreateTableRequest());
                 plugin.getServer().getPluginManager().registerEvents(this, plugin);
         }
 
@@ -32,13 +31,8 @@ public class SQLManager implements Listener {
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
         public void onSimpleShop(SimpleShopEvent event) {
-                LogTransactionRequest request = new LogTransactionRequest(plugin, event);
+                LogTransactionRequest request = new LogTransactionRequest(event);
                 connectionManager.queueRequest(request);
-        }
-
-        public void importLogs() {
-                LogImporter task = new LogImporter(plugin, connectionManager);
-                task.start();
         }
 
         public void listTransactions(CommandSender sender, String name, int page) {
@@ -49,5 +43,9 @@ public class SQLManager implements Listener {
         public void sendAveragePrice(CommandSender sender, ItemStack item, int days) {
                 AveragePriceRequest request = new AveragePriceRequest(plugin, sender, item, days);
                 connectionManager.queueRequest(request);
+        }
+
+        public void updateTable() {
+                connectionManager.queueRequest(new UpdateTableRequest());
         }
 }

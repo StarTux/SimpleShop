@@ -1,16 +1,13 @@
 package com.winthier.simpleshop.sql;
 
-import com.winthier.libsql.PluginSQLRequest;
-import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.libsql.SQLRequest;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import org.bukkit.enchantments.Enchantment;
 
-public class CreateTableRequest extends PluginSQLRequest {
-        CreateTableRequest(SimpleShopPlugin plugin) {
-                super(plugin);
-        }
+public class CreateTableRequest implements SQLRequest {
+        CreateTableRequest() {}
 
         @Override
         public void execute(Connection c) throws SQLException {
@@ -23,7 +20,7 @@ public class CreateTableRequest extends PluginSQLRequest {
                 sb.append(" `player` VARCHAR(16) NOT NULL,");
                 sb.append(" `owner` VARCHAR(16) DEFAULT NULL,");
                 sb.append(" `price` FLOAT(11, 4) NOT NULL,");
-                sb.append(" `itemid` INT(11) NOT NULL,");
+                sb.append(" `material` VARCHAR(32) NOT NULL,");
                 sb.append(" `amount` INT(11) NOT NULL,");
                 sb.append(" `itemdata` INT(6) NOT NULL DEFAULT 0,");
                 sb.append(" `display_name` VARCHAR(32) DEFAULT NULL,");
@@ -42,7 +39,7 @@ public class CreateTableRequest extends PluginSQLRequest {
                 sb.append(" KEY (`owner`),");
                 sb.append(" KEY (`shop_type`),");
                 sb.append(" KEY `location` (`world`, `x`, `y`, `z`),");
-                sb.append(" KEY (`itemid`)");
+                sb.append(" KEY (`material`)");
                 sb.append(") ENGINE=MyISAM");
                 s = c.createStatement();
                 s.execute(sb.toString());
