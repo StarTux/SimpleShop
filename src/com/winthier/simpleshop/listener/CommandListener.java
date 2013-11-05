@@ -2,7 +2,6 @@ package com.winthier.simpleshop.listener;
 
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.Util;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -26,16 +25,18 @@ public class CommandListener implements CommandExecutor {
                 Player player = null;
                 if (sender instanceof Player) player = (Player)sender;
                 if (args.length == 0) {
-                        Util.sendMessage(sender, "&e* &lSimpleShop help&e *");
-                        Util.sendMessage(sender, "&e/shop &6price [price]&r - Set the price");
+                        Util.sendMessage(sender, "&3* &lSimpleShop help&3 *");
+                        if (plugin.allowShopSigns()) {
+                                Util.sendMessage(sender, "&b/shop &3price [&oprice&3]&r - Set the price");
+                        }
                         if (plugin.sqlManager != null) {
-                                Util.sendMessage(sender, "&e/shop &6list [page]&r - List sales");
-                                Util.sendMessage(sender, "&e/shop &6avg&r - Get average price of item in hand");
+                                Util.sendMessage(sender, "&b/shop &3list [&opage&3]&r - List sales");
+                                Util.sendMessage(sender, "&b/shop &3avg [&odays&3]&r - Get average price of item in hand");
                         }
                         return true;
                 } else if (args.length == 2 && args[0].equals("price")) {
                         if (!sender.hasPermission("simpleshop.edit")) {
-                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
                         }
                         if (player == null) {
@@ -46,27 +47,27 @@ public class CommandListener implements CommandExecutor {
                         try {
                                 price = Double.parseDouble(args[1]);
                         } catch (NumberFormatException nfe) {
-                                player.sendMessage("" + ChatColor.RED + "Number expected");
+                                Util.sendMessage(player, "&cNumber expected");
                                 return true;
                         }
                         if (price < 0.0) {
-                                player.sendMessage("" + ChatColor.RED + "Price must be positive");
+                                Util.sendMessage(player, "&cPrice must be positive");
                                 return true;
                         }
                         plugin.getPriceMap().put(player.getName(), price);
-                        player.sendMessage("" + ChatColor.RED + "Open one of your shop chest to set its price to " + plugin.getEconomy().format(price) + ".");
+                        Util.sendMessage(player, "&cOpen one of your shop chest to set its price to .", plugin.formatPrice(price));
                         return true;
                 } else if (args.length == 1 && args[0].equals("import")) {
                         if (!sender.hasPermission("simpleshop.import")) {
-                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
                         }
-                        sender.sendMessage("import started");
+                        Util.sendMessage(sender, "import started");
                         return true;
                 } else if ((args.length >= 1 || args.length <= 3) && args[0].equals("list")) {
                         if (plugin.sqlManager == null) return false;
                         if (!sender.hasPermission("simpleshop.list.self")) {
-                                sender.sendMessage("" + ChatColor.RED + "You don't have permission");
+                                Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
                         }
                         int page = 0;
@@ -75,7 +76,7 @@ public class CommandListener implements CommandExecutor {
                                         page = Integer.parseInt(args[1]) - 1;
                                         if (page < 0) throw new NumberFormatException();
                                 } catch (NumberFormatException e) {
-                                        sender.sendMessage("" + ChatColor.RED + "Page number expected: " + args[1]);
+                                        Util.sendMessage(sender, "&cPage number expected: %s.", args[1]);
                                 }
                         }
                         if (player != null) plugin.sqlManager.listTransactions(sender, player.getName(), page);

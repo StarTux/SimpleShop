@@ -2,10 +2,12 @@ package com.winthier.simpleshop.sql;
 
 import com.winthier.libsql.PluginSQLRequest;
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.Util;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -95,10 +97,9 @@ public class ListTransactionsRequest extends PluginSQLRequest {
                 callback(result);
         }
 
-        private static String month[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
         @Override
         public void result(ResultSet result) throws SQLException {
-                sender.sendMessage(String.format("%sTransaction log for %s (page %d/%d)", ChatColor.GREEN, owner, page + 1, (count - 1) / PAGE_SIZE + 1));
+                Util.sendMessage(sender, "&bTransaction log for %s (page %d/%d)", owner, page + 1, (count - 1) / PAGE_SIZE + 1);
                 while (result.next()) {
                         String name;
                         ItemInfo info = Items.itemById(result.getInt("itemid"), (short)result.getInt("itemdata"));
@@ -126,7 +127,8 @@ public class ListTransactionsRequest extends PluginSQLRequest {
                         int amount = result.getInt("amount");
                         double price = result.getDouble("price");
                         cal.setTime(date);
-                        sender.sendMessage(String.format("%s%s %02d%s %s%s %s%s %dx%s%s for%s %s", ChatColor.AQUA, month[cal.get(Calendar.MONTH)], cal.get(Calendar.DAY_OF_MONTH), ChatColor.YELLOW, player, ChatColor.RESET, (shopType.equals("buy") ? "bought" : "sold"), ChatColor.YELLOW, amount, name, ChatColor.RESET, ChatColor.YELLOW, SimpleShopPlugin.formatPrice(price)));
+                        String[] months = DateFormatSymbols.getInstance().getShortMonths();
+                        Util.sendMessage(sender, "[&b%s %02d&r] &b%s &3%s &b%d&3x&b%s&3 for &b%s", months[cal.get(Calendar.MONTH)], cal.get(Calendar.DAY_OF_MONTH), player, (shopType.equals("buy") ? "bought" : "sold"), amount, name, SimpleShopPlugin.formatPrice(price));
                 }
         }
 }

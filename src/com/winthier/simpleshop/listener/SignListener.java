@@ -3,9 +3,10 @@ package com.winthier.simpleshop.listener;
 import com.winthier.simpleshop.ShopChest;
 import com.winthier.simpleshop.ShopSign;
 import com.winthier.simpleshop.SimpleShopPlugin;
-import org.bukkit.ChatColor;
+import com.winthier.simpleshop.Util;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,10 +33,11 @@ public class SignListener implements Listener {
          */
         @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
         public void onSignChange(SignChangeEvent event) {
-                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+                final Player player = event.getPlayer();
+                if (player.getGameMode() == GameMode.CREATIVE) return;
                 if (!ShopSign.isShopTitle(event.getLine(0))) return;
-                if (!event.getPlayer().hasPermission("simpleshop.create")) {
-                        event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission to create a shop");
+                if (!player.hasPermission("simpleshop.create")) {
+                        Util.sendMessage(player, "&cYou don't have permission to create a shop");
                         event.setCancelled(true);
                         return;
                 }
@@ -49,27 +51,27 @@ public class SignListener implements Listener {
                         event.setLine(1, "10");
                 }
                 if (event.getLine(3).equals(SimpleShopPlugin.getAdminShopName())) {
-                        if (!event.getPlayer().hasPermission("simpleshop.create.admin")) {
-                                event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission");
+                        if (!player.hasPermission("simpleshop.create.admin")) {
+                                Util.sendMessage(player, "&cYou don't have permission");
                                 event.setCancelled(true);
                                 return;
                         }
-                } else if (event.getLine(3).length() > 0 && event.getPlayer().hasPermission("simpleshop.create.other")) {
+                } else if (event.getLine(3).length() > 0 && player.hasPermission("simpleshop.create.other")) {
                         // do nothing
                 } else {
-                        String name = event.getPlayer().getName();
+                        String name = player.getName();
                         if (name.length() < 16) {
                                 event.setLine(2, "");
-                                event.setLine(3, event.getPlayer().getName());
+                                event.setLine(3, player.getName());
                         } else {
                                 event.setLine(2, name.substring(15));
                                 event.setLine(3, name.substring(0, 16));
                         }
                 }
                 if (event.getBlock().getRelative(0, -1, 0).getType() != Material.CHEST) {
-                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop sign. Put a chest underneath to sell things.");
+                        Util.sendMessage(player, "&bYou created a shop sign. Put a chest underneath to sell things.");
                 } else {
-                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest. Type " + ChatColor.WHITE + "/shop price [price]" + ChatColor.GREEN + " to change the price");
+                        Util.sendMessage(player, "&bYou created a shop chest. Type &f/shop price [price]&b to change the price");
                 }
         }
 }

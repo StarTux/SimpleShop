@@ -5,9 +5,9 @@ import com.winthier.simpleshop.ShopData;
 import com.winthier.simpleshop.ShopInventoryName;
 import com.winthier.simpleshop.ShopSign;
 import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.Util;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import java.util.Map;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -62,31 +62,32 @@ public class PlayerListener implements Listener {
          */
         @EventHandler(ignoreCancelled = false, priority = EventPriority.LOWEST)
         public void onPlayerInteract(PlayerInteractEvent event) {
+                final Player player = event.getPlayer();
                 if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
                 if (event.getClickedBlock() == null) return;
-                if (event.getPlayer().isSneaking() && event.getPlayer().getItemInHand() != null) return;
+                if (player.isSneaking() && player.getItemInHand() != null) return;
                 ShopChest shopChest = ShopChest.getByChest(event.getClickedBlock());
                 if (shopChest == null && plugin.allowShopSigns()) shopChest = ShopChest.getBySign(event.getClickedBlock());
                 if (shopChest == null) return;
-                if ((shopChest.isOwner(event.getPlayer()) && event.getPlayer().hasPermission("simpleshop.edit")) ||
-                    (!shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.other")) ||
-                    (shopChest.isAdminChest() && event.getPlayer().hasPermission("simpleshop.edit.admin"))) {
-                        Double price = plugin.getPriceMap().get(event.getPlayer().getName());
+                if ((shopChest.isOwner(player) && player.hasPermission("simpleshop.edit")) ||
+                    (!shopChest.isAdminChest() && player.hasPermission("simpleshop.edit.other")) ||
+                    (shopChest.isAdminChest() && player.hasPermission("simpleshop.edit.admin"))) {
+                        Double price = plugin.getPriceMap().get(player.getName());
                         if (price != null) {
                                 if (shopChest.setPrice(price)) {
-                                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "Price of this shop chest is now " + plugin.formatPrice(price) + ".");
+                                        Util.sendMessage(player, "&bPrice of this shop chest is now %s.", plugin.formatPrice(price));
                                 } else {
-                                        event.getPlayer().sendMessage("" + ChatColor.RED + "You can't change the price of this chest");
+                                        Util.sendMessage(player, "&cYou can't change the price of this chest");
                                 }
-                                plugin.getPriceMap().remove(event.getPlayer().getName());
+                                plugin.getPriceMap().remove(player.getName());
                                 event.setCancelled(true);
                                 return;
                         }
                 }
-                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+                if (player.getGameMode() == GameMode.CREATIVE) return;
                 if (shopChest.isBlocked()) return;
-                if (shopChest.isOwner(event.getPlayer())) {
-                        event.getPlayer().sendMessage("" + ChatColor.GREEN + "Your Shop Chest");
+                if (shopChest.isOwner(player)) {
+                        Util.sendMessage(player, "&bYour Shop Chest");
                 } else {
                         if (shopChest.isEmpty()) {
                                 shopChest.setSoldOut();
@@ -94,19 +95,19 @@ public class PlayerListener implements Listener {
                         double price = shopChest.getPrice();
                         String ownerName = shopChest.getOwnerName();
                         if (ownerName == null) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "Shop Chest");
+                                Util.sendMessage(player, "&bShop Chest");
                         } else {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + genitiveName(shopChest.getOwnerName()) + " Shop Chest");
+                                Util.sendMessage(player, "&b%s Shop Chest", genitiveName(shopChest.getOwnerName()));
                         }
                         if (!Double.isNaN(price) && shopChest.isBuyingChest()) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can sell for " + plugin.formatPrice(price) + ".");
+                                Util.sendMessage(player, "&bYou can sell for %s.", plugin.formatPrice(price));
                         }
                         if (!Double.isNaN(price) && shopChest.isSellingChest()) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You can buy for " + plugin.formatPrice(price) + ".");
+                                Util.sendMessage(player, "&bYou can buy for %s.", plugin.formatPrice(price));
                         }
                 }
                 event.setCancelled(true);
-                event.getPlayer().openInventory(shopChest.getInventory().getHolder().getInventory());
+                player.openInventory(shopChest.getInventory().getHolder().getInventory());
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -140,32 +141,33 @@ public class PlayerListener implements Listener {
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onBlockPlace(BlockPlaceEvent event) {
-                if (event.getPlayer().getGameMode() == GameMode.CREATIVE) return;
+                final Player player = event.getPlayer();
+                if (player.getGameMode() == GameMode.CREATIVE) return;
                 Block block = event.getBlock();
                 if (block.getType() != Material.CHEST && block.getType() != Material.TRAPPED_CHEST) return;
                 ShopData shopData = null;
-                ItemStack item = event.getPlayer().getItemInHand();
-                shopData = ShopInventoryName.fromItem(event.getPlayer().getItemInHand());
+                ItemStack item = player.getItemInHand();
+                shopData = ShopInventoryName.fromItem(player.getItemInHand());
                 if (shopData == null) {
                         ShopChest shopChest = ShopChest.getByChest(block);
                         if (shopChest != null) shopData = shopChest.getShopData();
                 }
                 if (shopData == null) return;
-                if (!event.getPlayer().hasPermission("simpleshop.create")) {
-                        event.getPlayer().sendMessage("" + ChatColor.RED + "You don't have permission to create a shop.");
+                if (!player.hasPermission("simpleshop.create")) {
+                        Util.sendMessage(player, "&cYou don't have permission to create a shop.");
                         event.setCancelled(true);
                         return;
                 }
-                if (event.getPlayer().hasPermission("simpleshop.create.other") || shopData.isOwner(event.getPlayer())) {
+                if (player.hasPermission("simpleshop.create.other") || shopData.isOwner(player)) {
                         if (shopData instanceof ShopSign) {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest. Type " + ChatColor.WHITE + "/shop price [price]" + ChatColor.GREEN + " to change the price");
+                                Util.sendMessage(player, "&bYou created a shop chest. Type &f/shop price [price]&b to change the price");
                         } else {
-                                event.getPlayer().sendMessage("" + ChatColor.GREEN + "You created a shop chest.");
+                                Util.sendMessage(player, "&bYou created a shop chest.");
                         }
                 } else if (!shopData.hasOwner() && plugin.useItemEconomy()) {
                         // do nothing
                 } else {
-                        event.getPlayer().sendMessage("" + ChatColor.RED + "You cannot create a shop chest for another player.");
+                        Util.sendMessage(player, "&bYou cannot create a shop chest for another player.");
                         event.setCancelled(true);
                         return;
                 }
@@ -228,10 +230,10 @@ public class PlayerListener implements Listener {
                 // deny clicking items in for non-owners
                 if (!event.isShiftClick() && isTopInventory && event.getCursor().getType() != Material.AIR) {
                         if (shopChest.isSellingChest()) {
-                                player.sendMessage("" + ChatColor.RED + "You can't sell here.");
+                                Util.sendMessage(player, "&cYou can't sell here.");
                         }
                         if (shopChest.isBuyingChest()) {
-                                player.sendMessage("" + ChatColor.RED + "Use shift click to sell items.");
+                                Util.sendMessage(player, "&cUse shift click to sell items.");
                         }
                         return;
                 }
@@ -256,7 +258,7 @@ public class PlayerListener implements Listener {
                                         }
                                 }
                                 // deny shift clicking items in
-                                player.sendMessage("" + ChatColor.RED + "You can't put items in.");
+                                Util.sendMessage(player, "&cYou can't put items in.");
                                 return;
                         }
                         // try to sell item to chest
@@ -267,12 +269,12 @@ public class PlayerListener implements Listener {
                                 }
                                 double price = shopChest.getPrice();
                                 if (Double.isNaN(price)) {
-                                        player.sendMessage("" + ChatColor.RED + "You can't sell here.");
+                                        Util.sendMessage(player, "&cYou can't sell here.");
                                         return;
                                 }
                                 ItemStack buyItem = shopChest.getBuyItem(event.getCurrentItem());
                                 if (buyItem == null) {
-                                        player.sendMessage("" + ChatColor.RED + "You can't sell this here.");
+                                        Util.sendMessage(player, "&cYou can't sell this here.");
                                         return;
                                 }
                                 int sold = 0;
@@ -280,11 +282,11 @@ public class PlayerListener implements Listener {
                         buyLoop:
                                 while (restStack >= buyItem.getAmount()) {
                                         if (!shopChest.isAdminChest() && !plugin.getEconomy().has(shopChest.getOwnerName(), price)) {
-                                                player.sendMessage("" + ChatColor.RED + shopChest.getOwnerName() + " has run out of money.");
+                                                Util.sendMessage(player, "&c%s has run out of money.", shopChest.getOwnerName());
                                                 break buyLoop;
                                         }
                                         if (!shopChest.isAdminChest() && !shopChest.addSlot(buyItem.clone())) {
-                                                player.sendMessage("" + ChatColor.RED + "This chest is full.");
+                                                Util.sendMessage(player, "&cThis chest is full.");
                                                 shopChest.setSoldOut();
                                                 break buyLoop;
                                         }
@@ -304,10 +306,10 @@ public class PlayerListener implements Listener {
                                         } else {
                                                 event.getCurrentItem().setAmount(restStack);
                                         }
-                                        player.sendMessage("" + ChatColor.GREEN + "Sold for " + plugin.formatPrice(fullPrice) + ".");
+                                        Util.sendMessage(player, "&bSold for %s.", plugin.formatPrice(fullPrice));
                                         Player owner = shopChest.getOwner();
                                         if (owner != null) {
-                                                owner.sendMessage("" + ChatColor.GREEN + player.getName() + " sold " + soldItem.getAmount() + "x" + plugin.getItemName(soldItem) + " for " + plugin.formatPrice(fullPrice) + " to you.");
+                                                Util.sendMessage(player, "&b%s sold %dx%s for %s to you.", player.getName(), soldItem.getAmount(), plugin.getItemName(soldItem), plugin.formatPrice(fullPrice));
                                         }
                                         plugin.logSale(shopChest, player.getName(), soldItem, fullPrice);
                                         plugin.getServer().getPluginManager().callEvent(new SimpleShopEvent(player, shopChest, soldItem, fullPrice));
@@ -321,18 +323,18 @@ public class PlayerListener implements Listener {
                         double price = shopChest.getPrice();
                         if (Double.isNaN(price)) {
                                 if (shopChest.isSellingChest()) {
-                                        player.sendMessage("" + ChatColor.RED + "You can't buy here.");
+                                        Util.sendMessage(player, "&cYou can't buy here.");
                                 }
                                 if (shopChest.isBuyingChest()) {
-                                        player.sendMessage("" + ChatColor.RED + "You can't sell here.");
+                                        Util.sendMessage(player, "&cYou can't sell here.");
                                 }
                         } else {
                                 if (SimpleShopPlugin.useItemEconomy() && SimpleShopPlugin.getCurrencyValue(current.getData()) > 0.0) {
-                                        player.sendMessage("" + ChatColor.RED + "Don't take money!");
+                                        Util.sendMessage(player, "&cDon't take money!");
                                 } else if (shopChest.isSellingChest()) {
-                                        player.sendMessage("" + ChatColor.GREEN + "Buy this for " + plugin.formatPrice(price) + " by shift clicking.");
+                                        Util.sendMessage(player, "&bBuy this for %s by shift clicking.", plugin.formatPrice(price));
                                 } else if (shopChest.isBuyingChest()) {
-                                        player.sendMessage("" + ChatColor.GREEN + "Will pay " + plugin.formatPrice(price) + " for this item type.");
+                                        Util.sendMessage(player, "&bWill pay %s for this item type.", plugin.formatPrice(price));
                                 }
                         }
                         return;
@@ -346,7 +348,7 @@ public class PlayerListener implements Listener {
                                         int canTake = (int)(SimpleShopPlugin.getPaidItems(player) / currentValue);
                                         int willTake = Math.min(current.getAmount(), canTake);
                                         if (willTake == 0) {
-                                                player.sendMessage("" + ChatColor.RED + "Don't take money!");
+                                                Util.sendMessage(player, "&cDon't take money!");
                                                 return;
                                         }
                                         int newAmount = current.getAmount() - willTake;
@@ -364,14 +366,14 @@ public class PlayerListener implements Listener {
                                 }
                                 double price = shopChest.getPrice();
                                 if (Double.isNaN(price)) {
-                                        player.sendMessage("" + ChatColor.RED + "You can't buy here.");
+                                        Util.sendMessage(player, "&cYou can't buy here.");
                                         return;
                                 } else if (!SimpleShopPlugin.hasMoney(player, price)) {
-                                        player.sendMessage("" + ChatColor.RED + "You don't have enough money");
+                                        Util.sendMessage(player, "&cYou don't have enough money");
                                         return;
                                 }
                                 if (!SimpleShopPlugin.takeMoney(player, shopChest.getPrice())) {
-                                        player.sendMessage("" + ChatColor.RED + "Payment error");
+                                        Util.sendMessage(player, "&cPayment error");
                                         return;
                                 } else {
                                         // purchase made
@@ -382,15 +384,15 @@ public class PlayerListener implements Listener {
                                                 ItemStack retour = item.clone();
                                                 for (ItemStack is : retours.values()) retour.setAmount(retour.getAmount() - is.getAmount());
                                                 if (retour.getAmount() > 0) player.getInventory().removeItem(retour);
-                                                player.sendMessage("" + ChatColor.RED + "Your inventory is full.");
+                                                Util.sendMessage(player, "&cYour inventory is full.");
                                                 SimpleShopPlugin.giveMoney(player, price);
                                                 return;
                                         }
-                                        player.sendMessage("" + ChatColor.GREEN + "Bought for " + plugin.formatPrice(price) + ".");
+                                        Util.sendMessage(player, "&bBought for %s.", plugin.formatPrice(price));
                                         if (!shopChest.isAdminChest()) {
                                                 shopChest.giveOwnerMoney(price);
                                                 Player owner = shopChest.getOwner();
-                                                if (owner != null) owner.sendMessage("" + ChatColor.GREEN + player.getName() + " bought " + item.getAmount() + "x" + plugin.getItemName(item) + " for " + plugin.formatPrice(price) + " from you.");
+                                                if (owner != null) Util.sendMessage(owner, "&b%s bought %dx%s for %s from you.", player.getName(), item.getAmount(), plugin.getItemName(item), plugin.formatPrice(price));
                                                 event.setCurrentItem(null);
                                         } else {
                                                 event.setCurrentItem(event.getCurrentItem());
@@ -405,10 +407,10 @@ public class PlayerListener implements Listener {
                         }
                         if (shopChest.isBuyingChest()) {
                                 if (SimpleShopPlugin.useItemEconomy() && SimpleShopPlugin.getCurrencyValue(current.getData()) > 0.0) {
-                                        player.sendMessage("" + ChatColor.RED + "Don't take money!");
+                                        Util.sendMessage(player, "&cDon't take money!");
                                         return;
                                 }
-                                player.sendMessage("" + ChatColor.RED + "You can't buy here.");
+                                Util.sendMessage(player, "&cYou can't buy here.");
                                 return;
                         }
                 }
