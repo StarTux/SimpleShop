@@ -27,11 +27,11 @@ public class CommandListener implements CommandExecutor {
                 if (args.length == 0) {
                         Util.sendMessage(sender, "&3* &lSimpleShop help&3 *");
                         if (plugin.allowShopSigns()) {
-                                Util.sendMessage(sender, "&b/shop &3price [&oprice&3]&r - Set the price");
+                                Util.sendMessage(sender, "&3/shop &bprice [&oprice&b]&r - Set the price");
                         }
                         if (plugin.sqlManager != null) {
-                                Util.sendMessage(sender, "&b/shop &3list [&opage&3]&r - List sales");
-                                Util.sendMessage(sender, "&b/shop &3avg [&odays&3]&r - Get average price of item in hand");
+                                Util.sendMessage(sender, "&3/shop &blist [&opage&b]&r - List sales");
+                                Util.sendMessage(sender, "&3/shop &bavg [&odays&b]&r - Get average price of item in hand");
                         }
                         return true;
                 } else if (args.length == 2 && args[0].equals("price")) {
@@ -100,8 +100,8 @@ public class CommandListener implements CommandExecutor {
                                 } catch (NumberFormatException nfe) {
                                         days = 0;
                                 }
-                                if (days <= 0) {
-                                        Util.sendMessage(sender, "&cPositive number expected: %s.", args[1]);
+                                if (days <= 0 || days > 9999) {
+                                        Util.sendMessage(sender, "&cNumber of days expected: %s.", args[1]);
                                         return true;
                                 }
                         }

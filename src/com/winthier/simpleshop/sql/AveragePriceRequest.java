@@ -39,6 +39,7 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
                 sb.append("SELECT COUNT(*) AS sample, sum(`price`) AS `price`, sum(`amount`) AS `amount` FROM `simpleshop_transactions`");
                 sb.append(" WHERE `itemid` = ").append(item.getTypeId());
                 sb.append(" AND `itemdata` = ").append((int)item.getDurability());
+                sb.append(" AND `time` > DATE_SUB(NOW(), INTERVAL ").append(days).append(" DAY)");
                 Map<Enchantment, Integer> enchantments = null;
                 ItemMeta meta = item.getItemMeta();
                 if (meta instanceof EnchantmentStorageMeta) {
@@ -83,7 +84,7 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
                         }
                 }
                 if (sampleSize == 0) {
-                        Util.sendMessage(sender, "&eThere are no samples for %s.", name);
+                        Util.sendMessage(sender, "&3There are no samples for &b%s&3 over the last &b%d&3 days.", name, days);
                         return;
                 }
                 double perItem = 0.0;
@@ -93,10 +94,10 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
                         perItem = price / (double)amount;
                         perStack = price * (double)stackSize / (double)amount;
                 }
-                Util.sendMessage(sender, "&aAverage price of &e%s&a from &e%d&a samples:", name.toString(), sampleSize);
-                Util.sendMessage(sender, "&e* &f%s &aper item.", plugin.formatPrice(perItem));
+                Util.sendMessage(sender, "&3Average price of &b%s&3 from &b%d&3 samples over the last &b%d&3 days:", name.toString(), sampleSize, days);
+                Util.sendMessage(sender, "&b* &f%s&b per item.", plugin.formatPrice(perItem));
                 if (stackSize > 1) {
-                        Util.sendMessage(sender, "&e* &f%s &aper stack (%d).", plugin.formatPrice(perStack), stackSize);
+                        Util.sendMessage(sender, "&b* &f%s&b per stack (&3%d&b).", plugin.formatPrice(perStack), stackSize);
                 }
         }
 }
