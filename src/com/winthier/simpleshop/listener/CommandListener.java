@@ -81,7 +81,7 @@ public class CommandListener implements CommandExecutor {
                         if (player != null) plugin.sqlManager.listTransactions(sender, player.getName(), page);
                         else plugin.sqlManager.listTransactions(sender, SimpleShopPlugin.getAdminShopName(), page);
                         return true;
-                } else if (args.length == 1 && (args[0].equals("avg") || args[0].equals("average"))) {
+                } else if (args.length <= 2 && (args[0].equals("avg") || args[0].equals("average"))) {
                         if (plugin.sqlManager == null) return false;
                         if (player == null) {
                                 Util.sendMessage(sender, "&cPlayer expected.");
@@ -92,7 +92,19 @@ public class CommandListener implements CommandExecutor {
                                 Util.sendMessage(sender, "&cHold the item to check in your hand.");
                                 return true;
                         }
-                        plugin.sqlManager.sendAveragePrice(sender, item);
+                        int days = 90;
+                        if (args.length >= 2) {
+                                try {
+                                        days = Integer.parseInt(args[1]);
+                                } catch (NumberFormatException nfe) {
+                                        days = 0;
+                                }
+                                if (days <= 0) {
+                                        Util.sendMessage(sender, "&cPositive number expected: %s.", args[1]);
+                                        return true;
+                                }
+                        }
+                        plugin.sqlManager.sendAveragePrice(sender, item, days);
                         return true;
                 }
                 return false;

@@ -46,8 +46,8 @@ public class SQLManager implements Listener {
                 connectionManager.queueRequest(request);
         }
 
-        public void sendAveragePrice(CommandSender sender, ItemStack item) {
-                AveragePriceRequest request = new AveragePriceRequest(plugin, sender, item);
+        public void sendAveragePrice(CommandSender sender, ItemStack item, int days) {
+                AveragePriceRequest request = new AveragePriceRequest(plugin, sender, item, days);
                 connectionManager.queueRequest(request);
         }
 }

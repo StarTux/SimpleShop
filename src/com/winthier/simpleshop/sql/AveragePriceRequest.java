@@ -19,14 +19,18 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
         private final SimpleShopPlugin plugin;
         private final CommandSender sender;
         private final ItemStack item;
+        private final int days;
+
+        // result
         private double price = 0.0;
         private int amount;
         private int sampleSize = 0;
 
-        public AveragePriceRequest(SimpleShopPlugin plugin, CommandSender sender, ItemStack item) {
+        public AveragePriceRequest(SimpleShopPlugin plugin, CommandSender sender, ItemStack item, int days) {
                 this.plugin = plugin;
                 this.sender = sender;
                 this.item = item.clone();
+                this.days = days;
         }
 
         @Override
