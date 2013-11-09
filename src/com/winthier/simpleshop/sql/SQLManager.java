@@ -48,4 +48,12 @@ public class SQLManager implements Listener {
         public void updateTable() {
                 connectionManager.queueRequest(new UpdateTableRequest());
         }
+
+        public void sendShopPlayerStatistics(CommandSender sender, String owner, int days, int page) {
+                connectionManager.queueRequest(new ShopStatisticsRequest(plugin, sender, owner, ShopStatisticsRequest.Type.PLAYER, days, page));
+        }
+
+        public void sendShopItemStatistics(CommandSender sender, String owner, int days, int page) {
+                connectionManager.queueRequest(new ShopStatisticsRequest(plugin, sender, owner, ShopStatisticsRequest.Type.ITEM, days, page));
+        }
 }

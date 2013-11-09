@@ -32,6 +32,8 @@ public class CommandListener implements CommandExecutor {
                         if (plugin.sqlManager != null) {
                                 Util.sendMessage(sender, "&3/shop &blist [&opage&b]&r - List sales");
                                 Util.sendMessage(sender, "&3/shop &bavg [&odays&b]&r - Get average price of item in hand");
+                                Util.sendMessage(sender, "&3/shop &bplayerstats [&odays&b] [&opage&b]&r - See whom you got your money from");
+                                Util.sendMessage(sender, "&3/shop &bitemstats [&odays&b] [&opage&b]&r - See which item earned you the most money");
                         }
                         return true;
                 } else if (args.length == 2 && args[0].equals("price")) {
@@ -99,6 +101,46 @@ public class CommandListener implements CommandExecutor {
                                 }
                         }
                         plugin.sqlManager.sendAveragePrice(sender, item, days);
+                        return true;
+                } else if (args.length >= 1 && args.length <= 3 && (args[0].equalsIgnoreCase("PlayerStats") || args[0].equalsIgnoreCase("ItemStats"))) {
+                        if (plugin.sqlManager == null) return false;
+                        if (player == null) {
+                                Util.sendMessage(sender, "&cPlayer expected.");
+                                return true;
+                        }
+                        if (!sender.hasPermission("simpleshop.playerstats")) {
+                                Util.sendMessage(sender, "&cYou don't have permission");
+                                return true;
+                        }
+                        int days = 90;
+                        if (args.length >= 2) {
+                                try {
+                                        days = Integer.parseInt(args[1]);
+                                } catch (NumberFormatException nfe) {
+                                        days = 0;
+                                }
+                                if (days < 1) {
+                                        Util.sendMessage(sender, "&cInvalid number of days: %s.", args[1]);
+                                        return true;
+                                }
+                        }
+                        int page = 0;
+                        if (args.length >= 3) {
+                                try {
+                                        page = Integer.parseInt(args[2]) - 1;
+                                } catch (NumberFormatException nfe) {
+                                        page = -1;
+                                }
+                                if (page < 0) {
+                                        Util.sendMessage(sender, "&cInvalid page number: %s.", args[2]);
+                                        return true;
+                                }
+                        }
+                        if (args[0].equalsIgnoreCase("PlayerStats")) {
+                                plugin.sqlManager.sendShopPlayerStatistics(sender, sender.getName(), days, page);
+                        } else if (args[0].equalsIgnoreCase("ItemStats")) {
+                                plugin.sqlManager.sendShopItemStatistics(sender, sender.getName(), days, page);
+                        }
                         return true;
                 } else if (args.length == 1 && args[0].equals("update")) {
                         if (!sender.hasPermission("simpleshop.admin")) {
