@@ -309,7 +309,7 @@ public class PlayerListener implements Listener {
                                         Util.sendMessage(player, "&bSold for %s.", plugin.formatPrice(fullPrice));
                                         Player owner = shopChest.getOwner();
                                         if (owner != null) {
-                                                Util.sendMessage(player, "&b%s sold %dx%s for %s to you.", player.getName(), soldItem.getAmount(), plugin.getItemName(soldItem), plugin.formatPrice(fullPrice));
+                                                Util.sendMessage(player, "&b%s sold %dx%s for %s to you.", player.getName(), soldItem.getAmount(), Util.getItemName(soldItem), plugin.formatPrice(fullPrice));
                                         }
                                         plugin.logSale(shopChest, player.getName(), soldItem, fullPrice);
                                         plugin.getServer().getPluginManager().callEvent(new SimpleShopEvent(player, shopChest, soldItem, fullPrice));
@@ -392,7 +392,7 @@ public class PlayerListener implements Listener {
                                         if (!shopChest.isAdminChest()) {
                                                 shopChest.giveOwnerMoney(price);
                                                 Player owner = shopChest.getOwner();
-                                                if (owner != null) Util.sendMessage(owner, "&b%s bought %dx%s for %s from you.", player.getName(), item.getAmount(), plugin.getItemName(item), plugin.formatPrice(price));
+                                                if (owner != null) Util.sendMessage(owner, "&b%s bought %dx%s for %s from you.", player.getName(), item.getAmount(), Util.getItemName(item), plugin.formatPrice(price));
                                                 event.setCurrentItem(null);
                                         } else {
                                                 event.setCurrentItem(event.getCurrentItem());

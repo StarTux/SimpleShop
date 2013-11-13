@@ -1,5 +1,7 @@
 package com.winthier.simpleshop;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import net.milkbowl.vault.item.ItemInfo;
 import net.milkbowl.vault.item.Items;
 import org.bukkit.ChatColor;
@@ -19,7 +21,7 @@ public class Util {
                 sender.sendMessage(msg);
         }
 
-        private static String capitalName(String in) {
+        public static String capitalName(String in) {
                 return "" + Character.toUpperCase(in.charAt(0)) + in.substring(1, in.length()).toLowerCase();
         }
 
@@ -60,4 +62,16 @@ public class Util {
                 }
                 return name + "'s";
         }
+
+        public static String getTimeString() {
+                Calendar cal = GregorianCalendar.getInstance();
+                return String.format("%04d-%02d-%02d %02d:%02d:%02d",
+                                     cal.get(Calendar.YEAR),
+                                     cal.get(Calendar.MONTH) + 1,
+                                     cal.get(Calendar.DAY_OF_MONTH),
+                                     cal.get(Calendar.HOUR_OF_DAY),
+                                     cal.get(Calendar.MINUTE),
+                                     cal.get(Calendar.SECOND));
+        }
+
 }

@@ -66,7 +66,7 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
 
         @Override
         public void run() {
-                StringBuilder name = new StringBuilder(plugin.getItemName(item));
+                StringBuilder name = new StringBuilder(Util.getItemName(item));
                 ItemMeta meta = item.getItemMeta();
                 Map<Enchantment, Integer> enchantments = null;
                 if (meta instanceof EnchantmentStorageMeta) {

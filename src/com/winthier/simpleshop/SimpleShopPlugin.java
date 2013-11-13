@@ -8,8 +8,6 @@ import com.winthier.simpleshop.sql.SQLManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -166,37 +164,8 @@ public class SimpleShopPlugin extends JavaPlugin {
                 }
         }
 
-        public String getItemName(ItemStack item) {
-                try {
-                        return Items.itemByStack(item).getName();
-                } catch (NullPointerException npe) {
-                        // if vault is outdated
-                        String[] parts = item.getType().name().split("_");
-                        StringBuilder sb = new StringBuilder(capitalName(parts[0]));
-                        for (int i = 1; i < parts.length; ++i) {
-                                sb.append(" ").append(capitalName(parts[i]));
-                        }
-                        return sb.toString();
-                }
-        }
-
-        private static String capitalName(String in) {
-                return "" + Character.toUpperCase(in.charAt(0)) + in.substring(1, in.length()).toLowerCase();
-        }
-
         public Map<String, Double> getPriceMap() {
                 return priceMap;
-        }
-
-        private String getTimeString() {
-                Calendar cal = GregorianCalendar.getInstance();
-                return String.format("%04d-%02d-%02d %02d:%02d:%02d",
-                                     cal.get(Calendar.YEAR),
-                                     cal.get(Calendar.MONTH) + 1,
-                                     cal.get(Calendar.DAY_OF_MONTH),
-                                     cal.get(Calendar.HOUR_OF_DAY),
-                                     cal.get(Calendar.MINUTE),
-                                     cal.get(Calendar.SECOND));
         }
 
         public static boolean useItemEconomy() {
@@ -264,7 +233,7 @@ public class SimpleShopPlugin extends JavaPlugin {
                         itemName = item.getType().name().toLowerCase();
                         if (item.getDurability() != 0) itemName += ":" + item.getDurability();
                 }
-                final String time = getTimeString();
+                final String time = Util.getTimeString();
                 final String shopType = shop.isSellingChest() ? "buy" : "sell";
                 final String shopDirection = shop.isSellingChest() ? "from" : "to";
                 final Location loc = shop.getLocation();
