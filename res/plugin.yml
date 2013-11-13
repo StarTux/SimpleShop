@@ -1,6 +1,6 @@
 name: SimpleShop
 description: Sell items via chests
-version: 0.3
+version: 0.4
 author: StarTux
 depend: [ Vault, GriefPrevention ]
 softdepend: [ LibSQL, WorldGuard ]
