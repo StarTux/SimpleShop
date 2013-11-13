@@ -6,27 +6,30 @@ depend: [ Vault, GriefPrevention ]
 softdepend: [ LibSQL, WorldGuard ]
 main: com.winthier.simpleshop.SimpleShopPlugin
 commands:
-  shop:
+  Shop:
+    aliases: [ SimpleShop ]
     description: Shop command interface
-    permission: simpleshop.cmd.shop
+    permission: simpleshop.shop
     usage: /<command> [args...]
 permissions:
-  simpleshop.cmd.shop:
+  simpleshop.shop:
     description: Use the "/shop" command
-    default: true
-  simpleshop.admin:
-    description: All administrative privileges
+    default: op
+  simpleshop.*:
+    description: All privileges
     default: op
     children:
+      simpleshop.shop: true
+      simpleshop.stats: true
+      simpleshop.search: true
       simpleshop.create.admin: true
       simpleshop.edit.admin: true
       simpleshop.create.other: true
       simpleshop.edit.other: true
       simpleshop.update: true
-      simpleshop.search: true
   simpleshop.create:
     description: Create a shop
-    default: true
+    default: op
   simpleshop.create.other:
     description: Create a shop for another player
     default: op
@@ -35,7 +38,7 @@ permissions:
     default: op
   simpleshop.edit:
     description: Edit the price tag of your shop
-    default: true
+    default: op
   simpleshop.edit.other:
     description: Edit the price tag of another player's shop
     default: op
@@ -43,14 +46,17 @@ permissions:
     description: Edit the price tag of an admin shop
     default: op
   simpleshop.import:
-    description: Update the database schema for SimpleShop v0.3
+    description: Update the database schema
     default: op
-  simpleshop.list.self:
+  simpleshop.list:
     description: List your sales
     default: op
   simpleshop.average:
-    description: Lookup the average price via /shop avg
+    description: Look up the average price via "/shop avg"
+    default: op
+  simpleshop.stats:
+    description: Look up sales statistics
     default: op
   simpleshop.search:
-    description: Search the market via /shop search
+    description: Search the market via "/shop search"
     default: op

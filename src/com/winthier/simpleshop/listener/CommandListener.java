@@ -75,7 +75,7 @@ public class CommandListener implements CommandExecutor {
                         return true;
                 } else if ((args.length >= 1 || args.length <= 3) && "List".equalsIgnoreCase(args[0])) {
                         if (plugin.sqlManager == null) return false;
-                        if (!sender.hasPermission("simpleshop.list.self")) {
+                        if (!sender.hasPermission("simpleshop.list")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
                         }
@@ -122,7 +122,7 @@ public class CommandListener implements CommandExecutor {
                                 Util.sendMessage(sender, "&cPlayer expected.");
                                 return true;
                         }
-                        if (!sender.hasPermission("simpleshop.playerstats")) {
+                        if (!sender.hasPermission("simpleshop.stats")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
                         }
