@@ -51,7 +51,7 @@ public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
                         }
                 }
                 sb.append(" GROUP BY `owner`, `description`");
-                sb.append(" ORDER BY `price` / `amount` DESC");
+                sb.append(" ORDER BY `price` / `amount` ASC");
                 s = c.prepareStatement(sb.toString());
 
                 int i = 0;
