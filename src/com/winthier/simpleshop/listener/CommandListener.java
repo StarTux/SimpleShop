@@ -26,23 +26,31 @@ public class CommandListener implements CommandExecutor {
 
         @Override
         public boolean onCommand(CommandSender sender, Command command, String token, String args[]) {
+                if (!handleCommand(sender, command, token, args)) {
+                        Util.sendMessage(sender, "&b&lSimpleShop Help");
+                        if (plugin.allowShopSigns()) {
+                                Util.sendMessage(sender, "&3/Shop &bPrice [&oprice&b]&8 - &7Set the price");
+                        }
+                        if (plugin.sqlManager != null) {
+                                Util.sendMessage(sender, "&3/Shop &bList [&opage&b]&8 - &7List sales");
+                                Util.sendMessage(sender, "&3/Shop &bAvg [&odays&b]&8 - &7Get average price of item in hand");
+                                Util.sendMessage(sender, "&3/Shop &bPlayerStats [&odays&b] [&opage&b]&8 - &7View customer statistics");
+                                Util.sendMessage(sender, "&3/Shop &bItemStats [&odays&b] [&opage&b]&8 - &7View sales statistics");
+                                if (plugin.marketCrawler != null) {
+                                        Util.sendMessage(sender, "&3/Shop &bSearch [&oflags&b] <&okeyword&b...>&8 - &7Search the market");
+                                        Util.sendMessage(sender, "&3&o Flags: &b-f&3 Use whole keyword &b-e&3 Only exact matches");
+                                }
+                        }
+                }
+                return true;
+        }
+
+        private boolean handleCommand(CommandSender sender, Command command, String token, String args[]) {
                 Player player = null;
                 if (sender instanceof Player) player = (Player)sender;
                 if (args.length == 0) {
-                        Util.sendMessage(sender, "&3* &lSimpleShop help&3 *");
-                        if (plugin.allowShopSigns()) {
-                                Util.sendMessage(sender, "&3/shop &bprice [&oprice&b]&r - Set the price");
-                        }
-                        if (plugin.sqlManager != null) {
-                                Util.sendMessage(sender, "&3/shop &blist [&opage&b]&r - List sales");
-                                Util.sendMessage(sender, "&3/shop &bavg [&odays&b]&r - Get average price of item in hand");
-                                Util.sendMessage(sender, "&3/shop &bplayerstats [&odays&b] [&opage&b]&r - See whom you got your money from");
-                                Util.sendMessage(sender, "&3/shop &bitemstats [&odays&b] [&opage&b]&r - See which item earned you the most money");
-                                Util.sendMessage(sender, "&3/shop &bSearch [&oflags&b] <&okeyword&b...>&r - Search the market");
-                                Util.sendMessage(sender, "&3&o Flags: &b-f&3 Use whole keyword &b-e&3 Show exact matches");
-                        }
-                        return true;
-                } else if (args.length == 2 && args[0].equals("price")) {
+                        return false;
+                } else if (args.length == 2 && "Price".equalsIgnoreCase(args[0])) {
                         if (!sender.hasPermission("simpleshop.edit")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
@@ -65,7 +73,7 @@ public class CommandListener implements CommandExecutor {
                         plugin.getPriceMap().put(player.getName(), price);
                         Util.sendMessage(player, "&cOpen one of your shop chest to set its price to .", plugin.formatPrice(price));
                         return true;
-                } else if ((args.length >= 1 || args.length <= 3) && args[0].equals("list")) {
+                } else if ((args.length >= 1 || args.length <= 3) && "List".equalsIgnoreCase(args[0])) {
                         if (plugin.sqlManager == null) return false;
                         if (!sender.hasPermission("simpleshop.list.self")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
@@ -83,7 +91,7 @@ public class CommandListener implements CommandExecutor {
                         if (player != null) plugin.sqlManager.listTransactions(sender, player.getName(), page);
                         else plugin.sqlManager.listTransactions(sender, SimpleShopPlugin.getAdminShopName(), page);
                         return true;
-                } else if (args.length <= 2 && (args[0].equals("avg") || args[0].equals("average"))) {
+                } else if (args.length <= 2 && ("Avg".equalsIgnoreCase(args[0]) || "Average".equalsIgnoreCase(args[0]))) {
                         if (plugin.sqlManager == null) return false;
                         if (player == null) {
                                 Util.sendMessage(sender, "&cPlayer expected.");
@@ -108,7 +116,7 @@ public class CommandListener implements CommandExecutor {
                         }
                         plugin.sqlManager.sendAveragePrice(sender, item, days);
                         return true;
-                } else if (args.length >= 1 && args.length <= 3 && (args[0].equalsIgnoreCase("PlayerStats") || args[0].equalsIgnoreCase("ItemStats"))) {
+                } else if (args.length >= 1 && args.length <= 3 && ("PlayerStats".equalsIgnoreCase(args[0]) || "ItemStats".equalsIgnoreCase(args[0]))) {
                         if (plugin.sqlManager == null) return false;
                         if (player == null) {
                                 Util.sendMessage(sender, "&cPlayer expected.");
@@ -142,13 +150,13 @@ public class CommandListener implements CommandExecutor {
                                         return true;
                                 }
                         }
-                        if (args[0].equalsIgnoreCase("PlayerStats")) {
+                        if ("PlayerStats".equalsIgnoreCase(args[0])) {
                                 plugin.sqlManager.sendShopPlayerStatistics(sender, sender.getName(), days, page);
-                        } else if (args[0].equalsIgnoreCase("ItemStats")) {
+                        } else if ("ItemStats".equalsIgnoreCase(args[0])) {
                                 plugin.sqlManager.sendShopItemStatistics(sender, sender.getName(), days, page);
                         }
                         return true;
-                } else if (args.length >= 2 && args[0].equalsIgnoreCase("Search")) {
+                } else if (args.length >= 2 && "Search".equalsIgnoreCase(args[0])) {
                         if (plugin.sqlManager == null) return false;
                         if (!sender.hasPermission("simpleshop.search")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
@@ -191,7 +199,7 @@ public class CommandListener implements CommandExecutor {
                         }
                         plugin.sqlManager.searchOffers(sender, items, exact);
                         return true;
-                } else if (args.length == 1 && args[0].equalsIgnoreCase("More")) {
+                } else if (args.length == 1 && "More".equalsIgnoreCase(args[0])) {
                         if (player == null) {
                                 Util.sendMessage(sender, "&cPlayer expected.");
                                 return true;
@@ -205,7 +213,7 @@ public class CommandListener implements CommandExecutor {
                                 sender.sendMessage(msg);
                         }
                         return true;
-                } else if (args.length == 1 && args[0].equals("update")) {
+                } else if (args.length == 1 && "Update".equals(args[0])) {
                         if (!sender.hasPermission("simpleshop.admin")) {
                                 Util.sendMessage(sender, "&cYou don't have permission");
                                 return true;
