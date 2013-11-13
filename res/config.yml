@@ -7,5 +7,10 @@ UseItemEconomy: false
 currency:
   Emerald: 1
   Emerald_Block: 9
+offers:
+  Enabled: false
+  Regions: []
+  BlocksPerTick: 64
+  Interval: 60
 sql:
   enable: false

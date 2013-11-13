@@ -44,5 +44,35 @@ public class CreateTableRequest implements SQLRequest {
                 s = c.createStatement();
                 s.execute(sb.toString());
                 s.close();
+
+                // Make the offer list
+                s = c.createStatement();
+                s.execute(" CREATE TABLE IF NOT EXISTS `simpleshop_offers` (" +
+                          " `version` INT(11) UNSIGNED NOT NULL," +
+                          " `owner` VARCHAR(16) DEFAULT NULL," +
+                          " `world` VARCHAR(32) NOT NULL," +
+                          " `x` INT(11) NOT NULL," +
+                          " `y` INT(11) NOT NULL," +
+                          " `z` INT(11) NOT NULL," +
+                          " `amount` INT(11) NOT NULL," +
+                          " `price` FLOAT(11, 4) NOT NULL," +
+                          " `description` VARCHAR(255) NOT NULL," +
+                          " KEY (`version`)," +
+                          " KEY (`owner`)," +
+                          " KEY (`description`)" +
+                          ") ENGINE=MyISAM");
+                s.close();
+
+                s = c.createStatement();
+                s.execute(" CREATE TABLE IF NOT EXISTS `simpleshop_version` (" +
+                          "  `name` VARCHAR(16) NOT NULL," +
+                          "  `version` INT(11) UNSIGNED NOT NULL," +
+                          "  PRIMARY KEY (`name`)" +
+                          " ) ENGINE=MyISAM");
+                s.close();
+
+                s = c.createStatement();
+                s.execute(" INSERT IGNORE INTO `simpleshop_version` (`name`, `version`) VALUES ('offers', 0)");
+                s.close();
         }
 }

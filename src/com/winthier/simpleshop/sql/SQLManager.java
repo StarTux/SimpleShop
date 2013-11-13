@@ -3,6 +3,8 @@ package com.winthier.simpleshop.sql;
 import com.winthier.libsql.ConnectionManager;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
+import java.util.List;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
@@ -55,5 +57,21 @@ public class SQLManager implements Listener {
 
         public void sendShopItemStatistics(CommandSender sender, String owner, int days, int page) {
                 connectionManager.queueRequest(new ShopStatisticsRequest(plugin, sender, owner, ShopStatisticsRequest.Type.ITEM, days, page));
+        }
+
+        public void logOffer(String owner, Location location, int amount, double price, String description) {
+                connectionManager.queueRequest(new LogOfferRequest(owner, location, amount, price, description));
+        }
+
+        public void updateVersion(String name) {
+                connectionManager.queueRequest(new UpdateVersionRequest(name));
+        }
+
+        public void searchOffers(CommandSender sender, List<String> items, boolean exact) {
+                connectionManager.queueRequest(new SearchOffersRequest(plugin, sender, items, exact));
+        }
+
+        public void clearOffers() {
+                connectionManager.queueRequest(new ClearOffersRequest());
         }
 }

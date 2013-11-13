@@ -3,7 +3,7 @@ description: Sell items via chests
 version: 0.3
 author: StarTux
 depend: [ Vault, GriefPrevention ]
-softdepend: [ LibSQL ]
+softdepend: [ LibSQL, WorldGuard ]
 main: com.winthier.simpleshop.SimpleShopPlugin
 commands:
   shop:
@@ -23,6 +23,7 @@ permissions:
       simpleshop.create.other: true
       simpleshop.edit.other: true
       simpleshop.update: true
+      simpleshop.search: true
   simpleshop.create:
     description: Create a shop
     default: true
@@ -49,4 +50,7 @@ permissions:
     default: op
   simpleshop.average:
     description: Lookup the average price via /shop avg
+    default: op
+  simpleshop.search:
+    description: Search the market via /shop search
     default: op

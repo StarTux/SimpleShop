@@ -31,6 +31,7 @@ public class SimpleShopPlugin extends JavaPlugin {
         private Economy economy;
         private Map<String, Double> priceMap = new HashMap<String, Double>();
         private Map<String, Double> paidMap = new HashMap<String, Double>();
+        public final MessageStorage messageStore = new MessageStorage();
         // configuration
         private static SimpleShopPlugin instance;
         private boolean allowShopSigns, useItemEconomy;
@@ -39,6 +40,8 @@ public class SimpleShopPlugin extends JavaPlugin {
         private String currencyName;
         // sql
         public SQLManager sqlManager;
+        // offers
+        public MarketCrawler marketCrawler = null;
 
         @Override
         public void onEnable() {
@@ -84,6 +87,12 @@ public class SimpleShopPlugin extends JavaPlugin {
                         sqlManager = new SQLManager(this);
                         sqlManager.onEnable();
                 }
+                // setup market crawler
+                if (getConfig().getBoolean("offers.Enabled")) {
+                        marketCrawler = new MarketCrawler(this);
+                        marketCrawler.load(getConfig().getConfigurationSection("offers"));
+                        marketCrawler.onEnable();
+                }
                 getConfig().options().copyDefaults(true);
                 saveConfig();
         }
@@ -91,6 +100,10 @@ public class SimpleShopPlugin extends JavaPlugin {
         @Override
         public void onDisable() {
                 if (sqlManager != null) sqlManager.onDisable();
+                if (marketCrawler != null) {
+                        marketCrawler.onDisable();
+                        marketCrawler = null;
+                }
                 currencyName = null;
         }
 
