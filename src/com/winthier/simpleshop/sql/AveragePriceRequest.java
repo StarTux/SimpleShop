@@ -95,9 +95,9 @@ public class AveragePriceRequest extends BukkitRunnable implements SQLRequest {
                         perStack = price * (double)stackSize / (double)amount;
                 }
                 Util.sendMessage(sender, "&3Average price of &b%s&3 from &b%d&3 samples over the last &b%d&3 days:", name.toString(), sampleSize, days);
-                Util.sendMessage(sender, "&b* &f%s&b per item.", plugin.formatPrice(perItem));
+                Util.sendMessage(sender, " &f%s&b per item.", plugin.formatPrice(perItem));
                 if (stackSize > 1) {
-                        Util.sendMessage(sender, "&b* &f%s&b per stack (&3%d&b).", plugin.formatPrice(perStack), stackSize);
+                        Util.sendMessage(sender, " &f%s&b per stack (&3%d&b).", plugin.formatPrice(perStack), stackSize);
                 }
         }
 }
