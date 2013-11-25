@@ -60,6 +60,7 @@ public class ShopChest {
         }
 
         public static ShopChest getBySign(Block block) {
+                if (block.getType() != Material.SIGN_POST && block.getType() != Material.WALL_SIGN) return null;
                 return getByChest(block.getRelative(0, -1, 0));
         }
 
