@@ -223,6 +223,8 @@ public class MarketCrawler {
                 case 33: return "Silk Touch";
                 case 34: return "Unbreaking";
                 case 35: return "Fortune";
+                case 61: return "Luck of the Sea";
+                case 62: return "Lure";
                 default: return Util.niceEnumName(enchantment.getName());
                 }
         }
