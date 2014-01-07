@@ -65,7 +65,7 @@ public class SignListener implements Listener {
                                 event.setLine(3, player.getName());
                         } else {
                                 event.setLine(2, name.substring(15));
-                                event.setLine(3, name.substring(0, 16));
+                                event.setLine(3, name.substring(0, 15));
                         }
                 }
                 if (event.getBlock().getRelative(0, -1, 0).getType() != Material.CHEST) {

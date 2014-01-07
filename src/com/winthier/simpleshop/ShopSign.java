@@ -43,7 +43,9 @@ public class ShopSign implements ShopData {
 
         public String getOwnerName() {
                 if (isAdminShop()) return "The Bank";
-                return getSign().getLine(3) + getSign().getLine(2);
+                String result = getSign().getLine(3);
+                if (result.length() == 15) result += getSign().getLine(2);
+                return result;
         }
 
         @Override
