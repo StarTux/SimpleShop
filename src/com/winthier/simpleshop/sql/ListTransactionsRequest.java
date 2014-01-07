@@ -131,7 +131,9 @@ public class ListTransactionsRequest extends BukkitRunnable implements SQLReques
                         if (displayName != null) name += " Name=\"" + ChatColor.stripColor(displayName) + "\"";
                         StringBuilder sb = new StringBuilder();
                         for (Enchantment enchantment : Enchantment.values()) {
-                                int level = result.getInt("enchantment_" + enchantment.getName().toLowerCase());
+                                String enchantmentName = "enchantment_" + enchantment.getName().toLowerCase();
+                                if (enchantmentName.contains("unknown")) continue;
+                                int level = result.getInt(enchantmentName);
                                 if (level > 0) {
                                         if (sb.length() > 0) sb.append(", ");
                                         sb.append(getEnchantmentName(enchantment));
