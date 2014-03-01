@@ -1,6 +1,7 @@
 package com.winthier.simpleshop.sql;
 
 import com.winthier.libsql.SQLRequest;
+import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,13 +14,15 @@ import java.util.Map;
 import org.bukkit.Location;
 
 public class LogOfferRequest implements SQLRequest {
+        private final ShopType shopType;
         private final String owner;
         private final Location location;
         private final int amount;
         private final double price;
         private final String description;
 
-        LogOfferRequest(String owner, Location location, int amount, double price, String description) {
+        LogOfferRequest(ShopType shopType, String owner, Location location, int amount, double price, String description) {
+                this.shopType = shopType;
                 this.owner = owner;
                 this.location = location;
                 this.amount = amount;
@@ -35,17 +38,19 @@ public class LogOfferRequest implements SQLRequest {
         public void execute(Connection c) throws SQLException {
                 PreparedStatement s;
                 s = c.prepareStatement(" INSERT INTO `simpleshop_offers`" +
-                                       " (`version`, `owner`, `world`, `x`, `y`, `z`, `amount`, `price`, `description`)" +
+                                       " (`version`, `shop_type`, `owner`, `world`, `x`, `y`, `z`, `amount`, `price`, `description`)" +
                                        " VALUES ((SELECT `version` FROM `simpleshop_version` WHERE `name` = 'offers') + 1," +
-                                       " ?, ?, ?, ?, ?, ?, ?, ?)");
-                s.setString(1, owner);
-                s.setString(2, location.getWorld().getName());
-                s.setInt(3, location.getBlockX());
-                s.setInt(4, location.getBlockY());
-                s.setInt(5, location.getBlockZ());
-                s.setInt(6, amount);
-                s.setDouble(7, price);
-                s.setString(8, description);
+                                       " ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                int i = 1;
+                s.setString(i++, shopType.toString());
+                s.setString(i++, owner);
+                s.setString(i++, location.getWorld().getName());
+                s.setInt(i++, location.getBlockX());
+                s.setInt(i++, location.getBlockY());
+                s.setInt(i++, location.getBlockZ());
+                s.setInt(i++, amount);
+                s.setDouble(i++, price);
+                s.setString(i++, description);
                 s.execute();
                 s.close();
         }

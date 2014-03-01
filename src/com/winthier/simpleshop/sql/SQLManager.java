@@ -1,6 +1,7 @@
 package com.winthier.simpleshop.sql;
 
 import com.winthier.libsql.ConnectionManager;
+import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
 import java.util.List;
@@ -59,16 +60,16 @@ public class SQLManager implements Listener {
                 connectionManager.queueRequest(new ShopStatisticsRequest(plugin, sender, owner, ShopStatisticsRequest.Type.ITEM, days, page));
         }
 
-        public void logOffer(String owner, Location location, int amount, double price, String description) {
-                connectionManager.queueRequest(new LogOfferRequest(owner, location, amount, price, description));
+        public void logOffer(ShopType shopType, String owner, Location location, int amount, double price, String description) {
+                connectionManager.queueRequest(new LogOfferRequest(shopType, owner, location, amount, price, description));
         }
 
         public void updateVersion(String name) {
                 connectionManager.queueRequest(new UpdateVersionRequest(name));
         }
 
-        public void searchOffers(CommandSender sender, List<String> items, boolean exact) {
-                connectionManager.queueRequest(new SearchOffersRequest(plugin, sender, items, exact));
+        public void searchOffers(CommandSender sender, ShopType shopType, List<String> items, boolean exact) {
+                connectionManager.queueRequest(new SearchOffersRequest(plugin, sender, shopType, items, exact));
         }
 
         public void clearOffers() {

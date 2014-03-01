@@ -186,7 +186,8 @@ public class MarketCrawler {
         private boolean checkBlock() {
                 Block block = world.getBlockAt(x, y, z);
                 ShopChest shop = ShopChest.getByChest(block);
-                if (shop == null || !shop.isSellingChest()) return false;
+                if (shop == null) return false;
+                final ShopType shopType = shop.getShopType();
                 final double price = shop.getPrice();
                 if (Double.isNaN(price)) return false;
                 final String owner = shop.getOwnerName();
@@ -194,7 +195,7 @@ public class MarketCrawler {
                 Inventory inv = ((Chest)block.getState()).getBlockInventory();
                 for (ItemStack item : inv) {
                         if (item == null || item.getType() == Material.AIR) continue;
-                        logItem(owner, block.getLocation(), price, item);
+                        logItem(shopType, owner, block.getLocation(), price, item);
                 }
                 return true;
         }
@@ -229,7 +230,7 @@ public class MarketCrawler {
                 }
         }
 
-        private void logItem(String owner, Location location, double price, ItemStack item) {
+        private void logItem(ShopType shopType, String owner, Location location, double price, ItemStack item) {
                 StringBuilder desc = new StringBuilder(Util.getItemName(item));
                 if (item.hasItemMeta()) {
                         ItemMeta meta = item.getItemMeta();
@@ -255,6 +256,6 @@ public class MarketCrawler {
                                 }
                         }
                 }
-                plugin.sqlManager.logOffer(owner, location, item.getAmount(), price, desc.toString());
+                plugin.sqlManager.logOffer(shopType, owner, location, item.getAmount(), price, desc.toString());
         }
 }

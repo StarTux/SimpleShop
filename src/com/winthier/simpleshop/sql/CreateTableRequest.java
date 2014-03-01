@@ -49,6 +49,7 @@ public class CreateTableRequest implements SQLRequest {
                 s = c.createStatement();
                 s.execute(" CREATE TABLE IF NOT EXISTS `simpleshop_offers` (" +
                           " `version` INT(11) UNSIGNED NOT NULL," +
+                          " `shop_type` ENUM('buy', 'sell') NOT NULL DEFAULT 'buy'," +
                           " `owner` VARCHAR(16) DEFAULT NULL," +
                           " `world` VARCHAR(32) NOT NULL," +
                           " `x` INT(11) NOT NULL," +

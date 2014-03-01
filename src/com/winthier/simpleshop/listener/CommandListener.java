@@ -1,5 +1,6 @@
 package com.winthier.simpleshop.listener;
 
+import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.Util;
 import java.util.ArrayList;
@@ -197,7 +198,7 @@ public class CommandListener implements CommandExecutor {
                         } else {
                                 for (int i = 1; i < args.length; ++i) items.add(args[i]);
                         }
-                        plugin.sqlManager.searchOffers(sender, items, exact);
+                        plugin.sqlManager.searchOffers(sender, ShopType.BUY, items, exact);
                         return true;
                 } else if (args.length == 1 && "More".equalsIgnoreCase(args[0])) {
                         if (player == null) {

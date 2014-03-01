@@ -1,6 +1,7 @@
 package com.winthier.simpleshop.sql;
 
 import com.winthier.libsql.SQLRequest;
+import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.Util;
 import java.sql.Connection;
@@ -20,6 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
         private final SimpleShopPlugin plugin;
         private final CommandSender sender;
+        private final ShopType shopType;
         private final List<String> items;
         private final int PAGE_LEN = 4;
         private final int PAGE_KEY = 0;
@@ -27,9 +29,10 @@ public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
         // Result
         private final List<Offer> offers = new ArrayList<Offer>();
 
-        SearchOffersRequest(SimpleShopPlugin plugin, CommandSender sender, List<String> items, boolean exact) {
+        SearchOffersRequest(SimpleShopPlugin plugin, CommandSender sender, ShopType shopType, List<String> items, boolean exact) {
                 this.plugin = plugin;
                 this.sender = sender;
+                this.shopType = shopType;
                 this.items = items;
                 this.exact = exact;
         }
@@ -43,6 +46,7 @@ public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
                 sb.append("   SELECT `version` FROM `simpleshop_version`");
                 sb.append("   WHERE `name` = 'offers'");
                 sb.append(" )");
+                sb.append(" AND `shop_type` = ?");
                 for (int i = 0; i < items.size(); ++i) {
                         if (!exact) {
                                 sb.append(" AND `description` LIKE ?");
@@ -55,6 +59,7 @@ public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
                 s = c.prepareStatement(sb.toString());
 
                 int i = 0;
+                s.setString(++i, shopType.toString());
                 for (String item : items) {
                         if (!exact) {
                                 s.setString(++i, "%" + item + "%");

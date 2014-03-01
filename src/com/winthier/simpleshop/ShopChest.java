@@ -98,6 +98,15 @@ public class ShopChest {
                 return shopData.isAdminShop();
         }
 
+        public ShopType getShopType() {
+                // Shop types are reversed. A "buying" chest buys
+                // items, so the sign reads "sell" and the type is
+                // ShopType.SELL.
+                if (shopData.isSellingShop()) return ShopType.BUY;
+                if (shopData.isBuyingShop()) return ShopType.SELL;
+                return ShopType.BUY;
+        }
+
         public boolean isBuyingChest() {
                 return shopData.isBuyingShop();
         }
