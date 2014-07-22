@@ -1,0 +1,119 @@
+package com.winthier.simpleshop.sql;
+
+import com.winthier.libsql.SQLRequest;
+import com.winthier.simpleshop.ShopType;
+import com.winthier.simpleshop.SimpleShopPlugin;
+import com.winthier.simpleshop.Util;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
+
+public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
+    private final SimpleShopPlugin plugin;
+    private final Player player;
+    private String ownerName;
+    // State
+    private String worldName = null;
+    private boolean success = false;
+    private int x, z;
+
+    public ShopPortRequest(SimpleShopPlugin plugin, Player player, String ownerName) {
+        this.plugin = plugin;
+        this.player = player;
+        this.ownerName = ownerName;
+    }
+
+    @Override
+    public void execute(Connection c) throws SQLException {
+        PreparedStatement s;
+        StringBuilder sb = new StringBuilder();
+        sb.append(" SELECT `owner`, `world`, `x`, `z` FROM `simpleshop_offers`");
+        sb.append(" WHERE `version` = (");
+        sb.append("   SELECT `version` FROM `simpleshop_version`");
+        sb.append("   WHERE `name` = 'offers'");
+        sb.append(" )");
+        sb.append(" AND `owner` = ?");
+        s = c.prepareStatement(sb.toString());
+        s.setString(1, ownerName);
+        // Execute
+        ResultSet result = s.executeQuery();
+        int x = 0;
+        int z = 0;
+        int size = 0;
+        while (result.next()) {
+            ownerName = result.getString("owner");
+            if (worldName == null) {
+                worldName = result.getString("world");
+            }
+            if (worldName.equals(result.getString("world"))) {
+                success = true;
+                size += 1;
+                x += result.getInt("x");
+                z += result.getInt("z");
+            }
+        }
+        s.close();
+        if (size > 0) {
+            x /= size;
+            z /= size;
+        }
+        this.x = x;
+        this.z = z;
+
+        runTask(plugin);
+    }
+
+    private final int RADIUS = 7;
+    @Override
+    public void run() {
+        if (!success) {
+            Util.sendMessage(player, "&cShop not found: %s", ownerName);
+            return;
+        }
+        World world = plugin.getServer().getWorld(worldName);
+        if (world == null) return;
+        Block result = null;
+        for (int dx = -RADIUS; dx <= RADIUS; ++dx) {
+            for (int dz = -RADIUS; dz <= RADIUS; ++dz) {
+                Block block = world.getHighestBlockAt(x + dx, z + dz);
+                if (block.getRelative(BlockFace.DOWN).getType().isSolid()) {
+                    if (result == null || block.getY() < result.getY()) {
+                        result = block;
+                    } else if (block.getY() == result.getY()) {
+                        int tmpx, tmpz;
+                        tmpx = result.getX() - x;
+                        tmpz = result.getZ() - z;
+                        int dist = tmpx*tmpx + tmpz*tmpz;
+                        tmpx = block.getX() - x;
+                        tmpz = block.getZ() - z;
+                        int dist2 = tmpx*tmpx + tmpz*tmpz;
+                        if (dist2 < dist) result = block;
+                    }
+                }
+            }
+        }
+        if (result == null) {
+            Util.sendMessage(player, "&cCan't port you to %s's shop :(", ownerName);
+            return;
+        }
+        Location loc = result.getLocation().add(0.5, 0.0, 0.5);
+        Vector dir = new Vector(x - result.getX(), 0, z - result.getZ()).normalize();
+        loc.setDirection(dir);
+        player.teleport(loc);
+        Util.sendMessage(player, "&bTeleported to %s's shop.", ownerName);
+    }
+}

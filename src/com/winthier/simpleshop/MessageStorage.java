@@ -18,15 +18,15 @@ public class MessageStorage {
                 return result;
         }
 
-        public void storePage(Player player, String... lines) {
-                getStore(player).add(lines);
+        public void storePage(Player player, Object... o) {
+                getStore(player).add(o);
         }
 
-        public void storePage(Player player, List<String> lines) {
-                storePage(player, lines.toArray(new String[0]));
+        public void storePage(Player player, List<Object> lines) {
+                storePage(player, lines.toArray(new Object[0]));
         }
 
-        public String[] getPage(Player player, String... lines) {
+        public Object[] getPage(Player player) {
                 Store store = players.get(player);
                 if (store == null) return null;
                 return store.get();
@@ -38,15 +38,15 @@ public class MessageStorage {
 }
 
 class Store {
-        private LinkedList<String[]> pages = new LinkedList<String[]>();
+        private LinkedList<Object[]> pages = new LinkedList<>();
 
         public Store() {}
 
-        public void add(String[] page) {
+        public void add(Object[] page) {
                 pages.addLast(page);
         }
 
-        public String[] get() {
+        public Object[] get() {
                 if (pages.isEmpty()) return null;
                 return pages.removeFirst();
         }

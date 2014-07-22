@@ -88,6 +88,7 @@ public class PlayerListener implements Listener {
                 if (shopChest.isBlocked()) return;
                 if (shopChest.isOwner(player)) {
                         Util.sendMessage(player, "&bYour Shop Chest");
+                        return;
                 } else {
                         if (shopChest.isEmpty()) {
                                 shopChest.setSoldOut();
