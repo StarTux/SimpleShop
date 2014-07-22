@@ -90,7 +90,7 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
         for (int dx = -RADIUS; dx <= RADIUS; ++dx) {
             for (int dz = -RADIUS; dz <= RADIUS; ++dz) {
                 Block block = world.getHighestBlockAt(x + dx, z + dz);
-                if (block.getRelative(BlockFace.DOWN).getType().isSolid()) {
+                if (isSave(block)) {
                     if (result == null || block.getY() < result.getY()) {
                         result = block;
                     } else if (block.getY() == result.getY()) {
@@ -116,4 +116,13 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
         player.teleport(loc);
         Util.sendMessage(player, "&bTeleported to %s's shop.", ownerName);
     }
+
+    private boolean isSave(Block block) {
+        if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) return false;
+        for (int i = 0; i < 8; ++i) {
+            if (block.getRelative(BlockFace.UP, i).getType() != Material.AIR) return false;
+        }
+        return true;
+    }
+
 }
