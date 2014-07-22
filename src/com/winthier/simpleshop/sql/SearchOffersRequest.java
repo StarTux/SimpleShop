@@ -123,9 +123,10 @@ public class SearchOffersRequest extends BukkitRunnable implements SQLRequest {
     public void run() {
         // Header
         final int pages = (offers.size() - 1) / PAGE_LEN + 1;
-        StringBuilder sb = new StringBuilder("&3Search results for &b");
+        StringBuilder sb = new StringBuilder("&3&m   &3 Search results for &b");
         sb.append(items.get(0));
         for (int i = 1; i < items.size(); ++i) sb.append("&3, &b").append(items.get(i));
+        if (exact) sb.append(" &3(&bexact&3)");
         Util.sendMessage(player, sb.toString());
 
         // First page

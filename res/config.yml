@@ -10,7 +10,7 @@ currency:
 offers:
   Enabled: false
   Regions: []
-  BlocksPerTick: 64
+  ChunksPerTick: 1
   Interval: 60
 sql:
   enable: false

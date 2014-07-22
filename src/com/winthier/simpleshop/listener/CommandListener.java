@@ -1,5 +1,6 @@
 package com.winthier.simpleshop.listener;
 
+import com.winthier.simpleshop.MarketCrawler;
 import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.Util;
@@ -9,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandException;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -27,20 +29,26 @@ public class CommandListener implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String token, String args[]) {
-        if (!handleCommand(sender, command, token, args)) {
+        boolean result = true;
+        try {
+            result = handleCommand(sender, command, token, args);
+        } catch (CommandException ce) {
+            Util.sendMessage(sender, "&c%s", ce.getMessage());
+        }
+        if (!result) {
             Util.sendMessage(sender, "&b&lSimpleShop Help");
             if (plugin.allowShopSigns()) {
                 Util.sendMessage(sender, "&3/Shop &bPrice [&oprice&b]&8 - &7Set the price");
             }
             if (plugin.sqlManager != null) {
                 Util.sendMessage(sender, "&3/Shop &bList [&opage&b]&8 - &7List sales");
-                Util.sendMessage(sender, "&3/Shop &bPort [&oowner&b]&8 - &7Port to someone's shop");
                 Util.sendMessage(sender, "&3/Shop &bAvg [&odays&b]&8 - &7Get average price of item in hand");
                 Util.sendMessage(sender, "&3/Shop &bPlayerStats [&odays&b] [&opage&b]&8 - &7View customer statistics");
                 Util.sendMessage(sender, "&3/Shop &bItemStats [&odays&b] [&opage&b]&8 - &7View sales statistics");
                 if (plugin.marketCrawler != null) {
                     Util.sendMessage(sender, "&3/Shop &bSearch [&oflags&b] <&okeyword&b...>&8 - &7Search the market");
-                    Util.sendMessage(sender, "&3&o Flags: &b-f&3 Use whole keyword &b-e&3 Only exact matches");
+                    Util.sendMessage(sender, "&3/Shop &bPort [&oowner&b]&8 - &7Port to someone's shop");
+                    //Util.sendMessage(sender, "&3&o Flags: &b-f&3 Use whole keyword &b-e&3 Only exact matches");
                 }
             }
         }
@@ -158,14 +166,20 @@ public class CommandListener implements CommandExecutor {
                 plugin.sqlManager.sendShopItemStatistics(sender, sender.getName(), days, page);
             }
             return true;
-        } else if (args.length >= 2 && "Search".equalsIgnoreCase(args[0])) {
-            if (player == null) {
-                Util.sendMessage(sender, "&cPlayer expected.");
-                return true;
-            }
+        } else if (args.length >= 1 && "Search".equalsIgnoreCase(args[0])) {
+            if (player == null) throw new CommandException("Player expected");
             if (plugin.sqlManager == null) return false;
-            if (!sender.hasPermission("simpleshop.search")) {
-                Util.sendMessage(sender, "&cYou don't have permission");
+            if (!sender.hasPermission("simpleshop.search")) throw new CommandException("You don't have permission");
+
+            if (args.length < 2 || (args.length == 2 && args[1].equals("!"))) {
+                boolean exact = false;
+                if (args.length >= 2 && args[1].equals("!")) exact = true;
+                ItemStack item = player.getItemInHand();
+                if (item == null || item.getType() == Material.AIR) throw new CommandException("Hold an item in your hand or provide search keywords");
+                String desc = MarketCrawler.getItemDescription(item);
+                List<String> list = new ArrayList<>(1);
+                list.add(desc);
+                plugin.sqlManager.searchOffers(player, ShopType.BUY, list, exact);
                 return true;
             }
 
@@ -173,32 +187,32 @@ public class CommandListener implements CommandExecutor {
             boolean exact = false;
             boolean full = false;
 
-            // The -e flag requires the search item to match the keywords exactly.
-            // The -f flag turns the whole remaining command line into one keyword.
-            if (args[1].length() > 1 && args[1].startsWith("-")) {
-                for (int i = 1; i < args[1].length(); ++i) {
-                    if (args[1].charAt(i) == 'e') exact = true;
-                    if (args[1].charAt(i) == 'f') full = true;
+            // Surrounding quotes turn the whole remaining command line into one keyword.
+            // A leading exclamation point requires the search item to match the keywords exactly.
+            {
+                if (args[1].startsWith("!")) {
+                    exact = true;
+                    args[1] = args[1].substring(1, args[1].length());
+                    args[1] = args[1];
+                }
+                if (args[1].startsWith("\"") && args[args.length - 1].endsWith("\"")) {
+                    full = true;
+                    args[1] = args[1].substring(1, args[1].length());
+                    args[args.length - 1] = args[args.length - 1].substring(0, args[args.length - 1].length() - 1);
                 }
             }
 
             // Check intput
             Pattern pattern = Pattern.compile("[A-Za-z0-9-_,.]+");
             for (int i = 1; i < args.length; ++i) {
-                if (!pattern.matcher(args[i]).matches()) {
-                    Util.sendMessage(sender, "&cBad keyword: %s.", args[i]);
-                    return true;
-                }
+                if (args[i].length() == 0) throw new CommandException("Empty keyword #" + i);
+                if (!pattern.matcher(args[i]).matches()) throw new CommandException("Bad keyword: " + args[i]);
             }
 
             // If any of the flags are present, the keywords have to be combined.
             if (exact || full) {
-                if (args.length < 3) {
-                    Util.sendMessage(sender, "&cKeywords missing.");
-                    return true;
-                }
-                StringBuilder sb = new StringBuilder(args[2]);
-                for (int i = 3; i < args.length; ++i) sb.append(" ").append(args[i]);
+                StringBuilder sb = new StringBuilder(args[1]);
+                for (int i = 2; i < args.length; ++i) sb.append(" ").append(args[i]);
                 items.add(sb.toString());
             } else {
                 for (int i = 1; i < args.length; ++i) items.add(args[i]);
