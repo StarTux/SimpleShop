@@ -46,9 +46,9 @@ public class CommandListener implements CommandExecutor {
                 Util.sendMessage(sender, "&3/Shop &bPlayerStats [&odays&b] [&opage&b]&8 - &7View customer statistics");
                 Util.sendMessage(sender, "&3/Shop &bItemStats [&odays&b] [&opage&b]&8 - &7View sales statistics");
                 if (plugin.marketCrawler != null) {
-                    Util.sendMessage(sender, "&3/Shop &bSearch [&oflags&b] <&okeyword&b...>&8 - &7Search the market");
+                    Util.sendMessage(sender, "&3/Shop &bSearch [&okeyword&b...]&8 - &7Search for items");
+                    Util.sendMessage(sender, "&3/Shop &bSearch! [&okeyword&b...]&8 - &7Search exact items");
                     Util.sendMessage(sender, "&3/Shop &bPort [&oowner&b]&8 - &7Port to someone's shop");
-                    //Util.sendMessage(sender, "&3&o Flags: &b-f&3 Use whole keyword &b-e&3 Only exact matches");
                 }
             }
         }
@@ -166,14 +166,15 @@ public class CommandListener implements CommandExecutor {
                 plugin.sqlManager.sendShopItemStatistics(sender, sender.getName(), days, page);
             }
             return true;
-        } else if (args.length >= 1 && "Search".equalsIgnoreCase(args[0])) {
+        } else if (args.length >= 1 && ("Search".equalsIgnoreCase(args[0]) || "Search!".equalsIgnoreCase(args[0]))) {
             if (player == null) throw new CommandException("Player expected");
             if (plugin.sqlManager == null) return false;
             if (!sender.hasPermission("simpleshop.search")) throw new CommandException("You don't have permission");
 
-            if (args.length < 2 || (args.length == 2 && args[1].equals("!"))) {
-                boolean exact = false;
-                if (args.length >= 2 && args[1].equals("!")) exact = true;
+            boolean exact = false;
+            if ("Search!".equalsIgnoreCase(args[0])) exact = true;
+
+            if (args.length < 2) {
                 ItemStack item = player.getItemInHand();
                 if (item == null || item.getType() == Material.AIR) throw new CommandException("Hold an item in your hand or provide search keywords");
                 String desc = MarketCrawler.getItemDescription(item);
@@ -184,24 +185,6 @@ public class CommandListener implements CommandExecutor {
             }
 
             List<String> items = new ArrayList<String>();
-            boolean exact = false;
-            boolean full = false;
-
-            // Surrounding quotes turn the whole remaining command line into one keyword.
-            // A leading exclamation point requires the search item to match the keywords exactly.
-            {
-                if (args[1].startsWith("!")) {
-                    exact = true;
-                    args[1] = args[1].substring(1, args[1].length());
-                    args[1] = args[1];
-                }
-                if (args[1].startsWith("\"") && args[args.length - 1].endsWith("\"")) {
-                    full = true;
-                    args[1] = args[1].substring(1, args[1].length());
-                    args[args.length - 1] = args[args.length - 1].substring(0, args[args.length - 1].length() - 1);
-                }
-            }
-
             // Check intput
             Pattern pattern = Pattern.compile("[A-Za-z0-9-_,.]+");
             for (int i = 1; i < args.length; ++i) {
@@ -210,12 +193,18 @@ public class CommandListener implements CommandExecutor {
             }
 
             // If any of the flags are present, the keywords have to be combined.
-            if (exact || full) {
+            if (exact) {
                 StringBuilder sb = new StringBuilder(args[1]);
                 for (int i = 2; i < args.length; ++i) sb.append(" ").append(args[i]);
                 items.add(sb.toString());
             } else {
-                for (int i = 1; i < args.length; ++i) items.add(args[i]);
+                for (int i = 1; i < args.length; ++i) {
+                    String keyword = args[i];
+                    if (keyword.length() > 3 && keyword.endsWith("s")) {
+                        keyword = keyword.substring(0, keyword.length() - 1);
+                    }
+                    items.add(keyword);
+                }
             }
             plugin.sqlManager.searchOffers(player, ShopType.BUY, items, exact);
             return true;
