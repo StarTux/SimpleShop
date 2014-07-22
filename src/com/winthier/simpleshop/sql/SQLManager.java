@@ -4,6 +4,7 @@ import com.winthier.libsql.ConnectionManager;
 import com.winthier.simpleshop.ShopType;
 import com.winthier.simpleshop.SimpleShopPlugin;
 import com.winthier.simpleshop.event.SimpleShopEvent;
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -61,8 +62,17 @@ public class SQLManager implements Listener {
         connectionManager.queueRequest(new ShopStatisticsRequest(plugin, sender, owner, ShopStatisticsRequest.Type.ITEM, days, page));
     }
 
+    private List<LogOfferRequest.Offer> offerCache = new ArrayList<>();
     public void logOffer(ShopType shopType, String owner, Location location, int amount, double price, String description) {
-        connectionManager.queueRequest(new LogOfferRequest(shopType, owner, location, amount, price, description));
+        if (offerCache.size() >= 1000) flushOfferCache();
+        LogOfferRequest.Offer offer = new LogOfferRequest.Offer(shopType, owner, location, amount, price, description);
+        offerCache.add(offer);
+    }
+
+    public void flushOfferCache() {
+        boolean result = connectionManager.queueRequest(new LogOfferRequest(offerCache));
+        if (!result) System.err.println("Offer cache overflow!");
+        offerCache = new ArrayList<>();
     }
 
     public void updateVersion(String name) {

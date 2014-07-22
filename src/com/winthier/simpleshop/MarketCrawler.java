@@ -95,6 +95,7 @@ public class MarketCrawler {
         if (!regionSelected) {
             try {
                 if (!nextRegion()) {
+                    plugin.sqlManager.flushOfferCache();
                     plugin.sqlManager.updateVersion("offers");
                     plugin.sqlManager.clearOffers();
                     delay();
@@ -188,6 +189,7 @@ public class MarketCrawler {
 
     private void checkChunk() {
         Chunk chunk = world.getChunkAt(chunkX, chunkZ);
+        chunk.load();
         for (BlockState state : chunk.getTileEntities()) {
             if (state instanceof Chest) {
                 Inventory inv = ((Chest)state).getInventory();
