@@ -70,6 +70,7 @@ public class SQLManager implements Listener {
     }
 
     public void flushOfferCache() {
+        if (offerCache.isEmpty()) return;
         boolean result = connectionManager.queueRequest(new LogOfferRequest(offerCache));
         if (!result) System.err.println("Offer cache overflow!");
         offerCache = new ArrayList<>();
