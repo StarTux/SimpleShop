@@ -11,11 +11,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -77,7 +80,12 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
         runTask(plugin);
     }
 
-    private final int RADIUS = 7;
+    private int hdist(int x1, int z1, int x2, int z2) {
+        int a = x1 - x2;
+        int b = z1 - z2;
+        return a*a + b*b;
+    }
+
     @Override
     public void run() {
         if (!success) {
@@ -86,43 +94,103 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
         }
         World world = plugin.getServer().getWorld(worldName);
         if (world == null) return;
+        Chunk chunk;
+        chunk = world.getBlockAt(x, 64, z).getChunk();
+        final int chunkX = chunk.getX();
+        final int chunkZ = chunk.getZ();
         Block result = null;
-        for (int dx = -RADIUS; dx <= RADIUS; ++dx) {
-            for (int dz = -RADIUS; dz <= RADIUS; ++dz) {
-                Block block = world.getHighestBlockAt(x + dx, z + dz);
-                if (isSave(block)) {
-                    if (result == null || block.getY() < result.getY()) {
-                        result = block;
-                    } else if (block.getY() == result.getY()) {
-                        int tmpx, tmpz;
-                        tmpx = result.getX() - x;
-                        tmpz = result.getZ() - z;
-                        int dist = tmpx*tmpx + tmpz*tmpz;
-                        tmpx = block.getX() - x;
-                        tmpz = block.getZ() - z;
-                        int dist2 = tmpx*tmpx + tmpz*tmpz;
-                        if (dist2 < dist) result = block;
+        int dist = 0;
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dz = -1; dz <= 1; ++dz) {
+                chunk = world.getChunkAt(chunkX + dx, chunkZ + dz);
+                for (BlockState state : chunk.getTileEntities()) {
+                    if (state instanceof Sign) {
+                        if (checkSign((Sign)state)) {
+                            Block block = state.getBlock();
+                            if (result == null) {
+                                result = block;
+                                dist = hdist(x, z, block.getX(), block.getZ());
+                            } else {
+                                int dist2 = hdist(x, z, block.getX(), block.getZ());
+                                if (dist2 < dist) {
+                                    result = block;
+                                    dist = dist2;
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
         if (result == null) {
             Util.sendMessage(player, "&cCan't port you to %s's shop :(", ownerName);
-            return;
+        } else {
+            Location loc = result.getLocation().add(0.5, 0.0, 0.5);
+            Vector dir = new Vector(x - result.getX(), 0, z - result.getZ()).normalize();
+            loc.setDirection(dir);
+            player.teleport(loc);
+            Util.sendMessage(player, "&bTeleported to %s's shop.", ownerName);
         }
-        Location loc = result.getLocation().add(0.5, 0.0, 0.5);
-        Vector dir = new Vector(x - result.getX(), 0, z - result.getZ()).normalize();
-        loc.setDirection(dir);
-        player.teleport(loc);
-        Util.sendMessage(player, "&bTeleported to %s's shop.", ownerName);
     }
 
-    private boolean isSave(Block block) {
-        if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) return false;
-        for (int i = 0; i < 8; ++i) {
-            if (block.getRelative(BlockFace.UP, i).getType() != Material.AIR) return false;
-        }
+    private final String line1 = Util.format("&f&l");
+    private final String line2 = Util.format("&f");
+    private final String line3 = Util.format("&f");
+    private final String line4 = Util.format("&f&m   ");
+    private boolean checkSign(Sign sign) {
+        if (!sign.getLine(0).startsWith(line1)) return false;
+        if (!sign.getLine(1).startsWith(line2)) return false;
+        if (!sign.getLine(2).startsWith(line3)) return false;
+        if (!sign.getLine(3).startsWith(line4)) return false;
+        if (sign.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR) return false;
         return true;
     }
 
+    // private final int RADIUS = 7;
+    // @Override
+    // public void run() {
+    //     if (!success) {
+    //         Util.sendMessage(player, "&cShop not found: %s", ownerName);
+    //         return;
+    //     }
+    //     World world = plugin.getServer().getWorld(worldName);
+    //     if (world == null) return;
+    //     Block result = null;
+    //     for (int dx = -RADIUS; dx <= RADIUS; ++dx) {
+    //         for (int dz = -RADIUS; dz <= RADIUS; ++dz) {
+    //             Block block = world.getHighestBlockAt(x + dx, z + dz);
+    //             if (isSave(block)) {
+    //                 if (result == null || block.getY() < result.getY()) {
+    //                     result = block;
+    //                 } else if (block.getY() == result.getY()) {
+    //                     int tmpx, tmpz;
+    //                     tmpx = result.getX() - x;
+    //                     tmpz = result.getZ() - z;
+    //                     int dist = tmpx*tmpx + tmpz*tmpz;
+    //                     tmpx = block.getX() - x;
+    //                     tmpz = block.getZ() - z;
+    //                     int dist2 = tmpx*tmpx + tmpz*tmpz;
+    //                     if (dist2 < dist) result = block;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if (result == null) {
+    //         Util.sendMessage(player, "&cCan't port you to %s's shop :(", ownerName);
+    //         return;
+    //     }
+    //     Location loc = result.getLocation().add(0.5, 0.0, 0.5);
+    //     Vector dir = new Vector(x - result.getX(), 0, z - result.getZ()).normalize();
+    //     loc.setDirection(dir);
+    //     player.teleport(loc);
+    //     Util.sendMessage(player, "&bTeleported to %s's shop.", ownerName);
+    // }
+    //
+    // private boolean isSave(Block block) {
+    //     if (!block.getRelative(BlockFace.DOWN).getType().isSolid()) return false;
+    //     for (int i = 0; i < 8; ++i) {
+    //         if (block.getRelative(BlockFace.UP, i).getType() != Material.AIR) return false;
+    //     }
+    //     return true;
+    // }
 }
