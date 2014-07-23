@@ -55,7 +55,10 @@ public class CreateTableRequest implements SQLRequest {
                           " `x` INT(11) NOT NULL," +
                           " `y` INT(11) NOT NULL," +
                           " `z` INT(11) NOT NULL," +
+                          " `material` VARCHAR(32) NOT NULL," + // new
                           " `amount` INT(11) NOT NULL," +
+                          " `itemdata` INT(6) NOT NULL DEFAULT 0," + // new
+                          " `display_name` VARCHAR(32) DEFAULT NULL," + // new
                           " `price` FLOAT(11, 4) NOT NULL," +
                           " `description` VARCHAR(255) NOT NULL," +
                           " KEY (`version`)," +

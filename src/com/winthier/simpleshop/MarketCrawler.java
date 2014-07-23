@@ -273,6 +273,6 @@ public class MarketCrawler {
 
     private void logItem(ShopType shopType, String owner, Location location, double price, ItemStack item) {
         String desc = getItemDescription(item);
-        plugin.sqlManager.logOffer(shopType, owner, location, item.getAmount(), price, desc);
+        plugin.sqlManager.logOffer(shopType, owner, location, item, price, desc);
     }
 }

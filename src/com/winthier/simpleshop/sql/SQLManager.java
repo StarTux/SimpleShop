@@ -63,9 +63,9 @@ public class SQLManager implements Listener {
     }
 
     private List<LogOfferRequest.Offer> offerCache = new ArrayList<>();
-    public void logOffer(ShopType shopType, String owner, Location location, int amount, double price, String description) {
+    public void logOffer(ShopType shopType, String owner, Location location, ItemStack item, double price, String description) {
         if (offerCache.size() >= 1000) flushOfferCache();
-        LogOfferRequest.Offer offer = new LogOfferRequest.Offer(shopType, owner, location, amount, price, description);
+        LogOfferRequest.Offer offer = new LogOfferRequest.Offer(shopType, owner, location, item, price, description);
         offerCache.add(offer);
     }
 

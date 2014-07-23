@@ -86,4 +86,9 @@ public class Util {
         String cmd = "tellraw " + player.getName() + " " + arg;
         Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd);
     }
+
+    public static String truncate(String string, int length) {
+        if (string.length() > length) string = string.substring(0, length);
+        return string;
+    }
 }
