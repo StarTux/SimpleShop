@@ -107,7 +107,7 @@ public class CommandListener implements CommandExecutor {
                 Util.sendMessage(sender, "&cPlayer expected.");
                 return true;
             }
-            ItemStack item = player.getItemInHand();
+            ItemStack item = player.getInventory().getItemInMainHand();
             if (item == null || item.getType() == Material.AIR) {
                 Util.sendMessage(sender, "&cHold the item to check in your hand.");
                 return true;
@@ -175,7 +175,7 @@ public class CommandListener implements CommandExecutor {
             if ("Search!".equalsIgnoreCase(args[0])) exact = true;
 
             if (args.length < 2) {
-                ItemStack item = player.getItemInHand();
+                ItemStack item = player.getInventory().getItemInMainHand();
                 if (item == null || item.getType() == Material.AIR) throw new CommandException("Hold an item in your hand or provide search keywords");
                 String desc = MarketCrawler.getItemDescription(item);
                 List<String> list = new ArrayList<>(1);

@@ -65,7 +65,7 @@ public class PlayerListener implements Listener {
         final Player player = event.getPlayer();
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (event.getClickedBlock() == null) return;
-        if (player.isSneaking() && player.getItemInHand() != null) return;
+        if (player.isSneaking()) return;
         ShopChest shopChest = ShopChest.getByChest(event.getClickedBlock());
         if (shopChest == null && plugin.allowShopSigns()) shopChest = ShopChest.getBySign(event.getClickedBlock());
         if (shopChest == null) return;
@@ -136,8 +136,8 @@ public class PlayerListener implements Listener {
         Block block = event.getBlock();
         if (block.getType() != Material.CHEST && block.getType() != Material.TRAPPED_CHEST) return;
         ShopData shopData = null;
-        ItemStack item = player.getItemInHand();
-        shopData = ShopInventoryName.fromItem(player.getItemInHand());
+        ItemStack item = event.getItemInHand();
+        shopData = ShopInventoryName.fromItem(item);
         if (shopData == null) {
             ShopChest shopChest = ShopChest.getByChest(block);
             if (shopChest != null) shopData = shopChest.getShopData();
