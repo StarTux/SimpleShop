@@ -2,7 +2,7 @@ name: SimpleShop
 description: Sell items via chests
 version: 0.4
 author: StarTux
-depend: [ Vault, GriefPrevention ]
+depend: [ Vault ]
 softdepend: [ LibSQL, WorldGuard ]
 main: com.winthier.simpleshop.SimpleShopPlugin
 commands:

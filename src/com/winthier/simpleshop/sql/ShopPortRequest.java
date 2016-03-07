@@ -123,7 +123,7 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
             }
         }
         if (result == null) {
-            Util.sendMessage(player, "&cCan't port you to %s's shop :(", ownerName);
+            Util.sendMessage(player, "&cCan't port you to %s shop :(", Util.genitiveName(ownerName));
         } else {
             Location loc = result.getLocation().add(0.5, 0.0, 0.5);
             Vector dir = new Vector(x - result.getX(), 0, z - result.getZ()).normalize();
@@ -136,12 +136,12 @@ public class ShopPortRequest extends BukkitRunnable implements SQLRequest {
     private final String line1 = Util.format("&f&l");
     private final String line2 = Util.format("&f");
     private final String line3 = Util.format("&f");
-    private final String line4 = Util.format("&f&m   ");
+    //private final String line4 = Util.format("&f&m   ");
     private boolean checkSign(Sign sign) {
         if (!sign.getLine(0).startsWith(line1)) return false;
         if (!sign.getLine(1).startsWith(line2)) return false;
         if (!sign.getLine(2).startsWith(line3)) return false;
-        if (!sign.getLine(3).startsWith(line4)) return false;
+        //if (!sign.getLine(3).startsWith(line4)) return false;
         if (sign.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR) return false;
         return true;
     }
