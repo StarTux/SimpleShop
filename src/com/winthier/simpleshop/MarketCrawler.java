@@ -21,7 +21,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.potion.PotionData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class MarketCrawler {
@@ -257,6 +261,26 @@ public class MarketCrawler {
                     desc.append(getEnchantmentName(enchant));
                     desc.append(" ");
                     desc.append(enchants.get(enchant));
+                }
+            }
+            if (meta instanceof PotionMeta) {
+                PotionMeta potions = (PotionMeta)meta;
+                PotionData data = potions.getBasePotionData();
+                if (data != null) {
+                    desc.append(", ");
+                    desc.append(Util.niceEnumName(data.getType().name()));
+                    if (data.isExtended()) desc.append(" Ext");
+                    if (data.isUpgraded()) desc.append(" II");
+                }
+                if (potions.hasCustomEffects()) {
+                    for (PotionEffect effect: potions.getCustomEffects()) {
+                        desc.append(", ");
+                        desc.append(Util.niceEnumName(effect.getType().getName()));
+                        int amp = effect.getAmplifier();
+                        if (amp > 0) {
+                            desc.append(" ").append((amp+1));
+                        }
+                    }
                 }
             }
             if (meta instanceof SkullMeta) {
