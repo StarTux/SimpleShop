@@ -56,13 +56,8 @@ public class Util {
     /**
      * Helper function to create the genitive case of a player
      * obeying apostrophy rules. Examples:
-     * Sirabell => Sirabell's
-     * StarTux => StarTux'
      */
     public static String genitiveName(String name) {
-        if (name.endsWith("s") || name.endsWith("x") || name.endsWith("z")) {
-            return name + "'";
-        }
         return name + "'s";
     }
 
