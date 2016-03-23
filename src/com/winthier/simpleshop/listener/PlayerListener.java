@@ -277,7 +277,7 @@ public class PlayerListener implements Listener {
                     Util.sendMessage(player, "&bSold for %s.", plugin.formatPrice(fullPrice));
                     Player owner = shopChest.getOwner();
                     if (owner != null) {
-                        Util.sendMessage(player, "&b%s sold %dx%s for %s to you.", player.getName(), soldItem.getAmount(), Util.getItemName(soldItem), plugin.formatPrice(fullPrice));
+                        Util.sendMessage(owner, "&b%s sold %dx%s for %s to you.", player.getName(), soldItem.getAmount(), Util.getItemName(soldItem), plugin.formatPrice(fullPrice));
                     }
                     plugin.logSale(shopChest, player.getName(), soldItem, fullPrice);
                     plugin.getServer().getPluginManager().callEvent(new SimpleShopEvent(player, shopChest, soldItem, fullPrice));
